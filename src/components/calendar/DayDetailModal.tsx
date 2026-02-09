@@ -2,6 +2,7 @@ import { useTheme } from '@/constants/theme';
 import { dateToJd, getAuspiciousHours } from '@/services/lunar';
 import { DayInfo } from '@/services/lunar/types';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import {
     Modal,
@@ -22,6 +23,7 @@ interface DayDetailModalProps {
 
 export function DayDetailModal({ visible, onClose, dayInfo }: DayDetailModalProps) {
     const theme = useTheme();
+    const router = useRouter();
 
     const auspiciousHours = useMemo(() => {
         const jd = dateToJd(dayInfo.solar.day, dayInfo.solar.month, dayInfo.solar.year);
@@ -37,6 +39,19 @@ export function DayDetailModal({ visible, onClose, dayInfo }: DayDetailModalProp
         zodiacAnimal,
         holiday,
     } = dayInfo;
+
+    const handleCreateEvent = () => {
+        onClose();
+        router.push({
+            pathname: '/event/new',
+            params: {
+                lunarDay: lunar.day,
+                lunarMonth: lunar.month,
+                lunarYear: lunar.year,
+                isLeapMonth: lunar.leap ? 'true' : 'false',
+            },
+        });
+    };
 
     // Format solar date
     const solarDateStr = `Thứ ${getDayOfWeek(solar.day, solar.month, solar.year)}, ${solar.day}/${solar.month}/${solar.year}`;
@@ -58,7 +73,9 @@ export function DayDetailModal({ visible, onClose, dayInfo }: DayDetailModalProp
                         <Ionicons name="close" size={24} color={theme.textSecondary} />
                     </TouchableOpacity>
                     <Text style={[styles.headerTitle, { color: theme.text }]}>Chi tiết ngày</Text>
-                    <View style={styles.placeholder} />
+                    <TouchableOpacity onPress={handleCreateEvent} style={styles.headerAction}>
+                        <Ionicons name="add" size={28} color={theme.primary} />
+                    </TouchableOpacity>
                 </View>
 
                 <ScrollView style={styles.content}>
@@ -131,8 +148,8 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontWeight: '600',
     },
-    placeholder: {
-        width: 32,
+    headerAction: {
+        padding: 4,
     },
     content: {
         flex: 1,

@@ -3,15 +3,15 @@ import { getDayInfo } from '@/services/lunar';
 import { useEventsStore } from '@/stores/eventStore';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { DayCell } from './DayCell';
 import { DayDetailModal } from './DayDetailModal';
 
 export function CalendarView() {
-    const [selectedDate, setSelectedDate] = useState(
-        new Date().toISOString().split('T')[0]
-    );
+    const today = new Date().toISOString().split('T')[0];
+    const [selectedDate, setSelectedDate] = useState(today);
+    const [currentMonth, setCurrentMonth] = useState(today);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const events = useEventsStore((state) => state.events);
     const theme = useTheme();
@@ -29,6 +29,12 @@ export function CalendarView() {
             },
         };
     }, [selectedDate]);
+
+    const goToToday = () => {
+        const now = new Date().toISOString().split('T')[0];
+        setSelectedDate(now);
+        setCurrentMonth(now);
+    };
 
     const renderDay = ({ date, state }: any) => {
         if (!date) return null;
@@ -67,11 +73,15 @@ export function CalendarView() {
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
             <Calendar
-                current={selectedDate}
+                key={currentMonth}
+                current={currentMonth}
                 markedDates={markedDates}
                 dayComponent={renderDay}
                 onDayPress={(day: DateData) => {
                     setSelectedDate(day.dateString);
+                }}
+                onMonthChange={(month: DateData) => {
+                    setCurrentMonth(month.dateString);
                 }}
                 firstDay={1}
                 enableSwipeMonths={true}
@@ -103,6 +113,28 @@ export function CalendarView() {
                         color={theme.primary}
                     />
                 )}
+                renderHeader={(date: any) => {
+                    const monthName = date.toString('MMMM yyyy');
+                    return (
+                        <View style={styles.header}>
+                            <Text style={[styles.headerText, { color: theme.text }]}>
+                                {monthName}
+                            </Text>
+                            <TouchableOpacity
+                                style={[
+                                    styles.todayButton,
+                                    { borderColor: theme.today, backgroundColor: theme.isDark ? theme.surface : theme.background }
+                                ]}
+                                onPress={goToToday}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={[styles.todayButtonText, { color: theme.today }]}>
+                                    Hôm nay
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    );
+                }}
             />
 
             {dayInfo && (
@@ -119,5 +151,27 @@ export function CalendarView() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        paddingHorizontal: 10,
+    },
+    headerText: {
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    todayButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        borderWidth: 1,
+        marginLeft: 8,
+    },
+    todayButtonText: {
+        fontSize: 13,
+        fontWeight: '600',
     },
 });

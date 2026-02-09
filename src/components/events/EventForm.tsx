@@ -1,8 +1,9 @@
 import { useTheme } from '@/constants/theme';
+import { lunarToSolar } from '@/services/lunar';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { EventFormData, EventType } from '@/types/event';
 import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     Alert,
     ScrollView,
@@ -44,6 +45,13 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
     const [reminderTime, setReminderTime] = useState(
         initialData?.reminderTime ?? defaultReminderTime
     );
+
+    const solarDate = useMemo(() => {
+        const year = initialData?.lunarYear ?? new Date().getFullYear();
+        const result = lunarToSolar(lunarDay, lunarMonth, year, isLeapMonth);
+        if (result.day === 0) return null;
+        return result;
+    }, [lunarDay, lunarMonth, isLeapMonth, initialData?.lunarYear]);
 
     const handleSubmit = () => {
         if (!title.trim()) {
@@ -181,6 +189,17 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                         trackColor={{ false: theme.border, true: theme.primary }}
                     />
                 </View>
+
+                {solarDate && (
+                    <View style={styles.solarDateRow}>
+                        <Text style={[styles.solarDateLabel, { color: theme.textMuted }]}>
+                            Ngày dương lịch:
+                        </Text>
+                        <Text style={[styles.solarDateValue, { color: theme.text }]}>
+                            {solarDate.day.toString().padStart(2, '0')}/{solarDate.month.toString().padStart(2, '0')}/{solarDate.year}
+                        </Text>
+                    </View>
+                )}
             </View>
 
             {/* Reminder */}
@@ -303,6 +322,19 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 12,
+    },
+    solarDateRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 12,
+        gap: 8,
+    },
+    solarDateLabel: {
+        fontSize: 14,
+    },
+    solarDateValue: {
+        fontSize: 14,
+        fontWeight: '500',
     },
     switchLabel: {
         fontSize: 14,
