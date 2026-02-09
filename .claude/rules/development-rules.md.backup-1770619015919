@@ -1,0 +1,27 @@
+# Development Rules
+
+These rules are specific to the Lịch Việt project.
+
+## Code Standards
+- Use TypeScript for all code.
+- Follow strict typing.
+- Use functional components and hooks for React Native UI.
+- Use `useTheme` hook for all colors and styling (support both light and dark mode).
+- Use `AccessibleText` for all text elements to ensure consistent typography and accessibility.
+- Keep components focused and modular. If a file exceeds 200 lines, consider breaking it down.
+- Follow the project structure defined in `README.md`.
+
+## State Management
+- State should be managed using `Zustand`.
+- Persistent data should be stored using `MMKV`.
+- Event notifications should be synchronized with the `eventStore`.
+
+## UI/UX
+- Maintain a premium design aesthetic using Vietnamese cultural motifs (deep crimson, golden yellow).
+- Ensure all components look good in both light and dark modes.
+- Every interactive element must have a unique, descriptive ID.
+- Provide comprehensive VoiceOver support for all lunar date information.
+
+## Documentation
+- Document any complex logic, especially lunar calendar algorithms.
+- Keep the `docs/` folder updated with any significant architecture changes.
