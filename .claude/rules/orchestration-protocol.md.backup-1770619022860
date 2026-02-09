@@ -1,6 +1,0 @@
-# Orchestration Protocols
-
-- Delegate tasks to specialized sub-agents when appropriate.
-- Maintain cohesion between features developed by different agents.
-- Follow the architectural standards defined in `README.md` and `development-rules.md`.
-- Ensure a unified delivery of features.

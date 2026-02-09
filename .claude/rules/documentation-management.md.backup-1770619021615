@@ -1,7 +1,0 @@
-# Documentation Management
-
-- Maintain high-quality documentation in the `docs/` folder.
-- Follow the structure defined in `CLAUDE.md`.
-- Ensure `docs/codebase-summary.md` and `docs/system-architecture.md` are accurate.
-- Use kebab-case for long descriptive file names.
-- Always update documentation when making significant changes to the codebase.

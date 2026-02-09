@@ -1,9 +1,0 @@
-# Primary Workflow
-
-1. **Context Loading**: Always read `README.md` and `CLAUDE.md` at the start of a task.
-2. **Analysis**: Analyze the requirements and identify the necessary modules/services.
-3. **Drafting**: Create a plan for the implementation.
-4. **Implementation**: Develop the feature following `development-rules.md`.
-5. **Verification**: Verify the implementation with tests or by checking the build status.
-6. **Documentation**: Update any relevant documentation in the `docs/` folder.
-7. **Report**: Provide a concise report of the changes made, sacrificing grammar for concision if necessary.
