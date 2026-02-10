@@ -8,7 +8,8 @@
 ## 2026-02-10 | Recurrence & UI
 - **Event Creation Modes**: Introduced the distinction between "Single" and "Recurring" events. Updated `eventStore` and `CalendarView` to filter events by lunar year for one-time occurrences.
 - **Custom Recurrence**: Replaced hardcoded yearly recurrence with a flexible system (Days, Weeks, Months, Years) supporting both Solar and Lunar systems. Created `isEventOccurring` utility for mathematical date matching.
-- **Header UI Fixes**: Improved calendar header spacing and added a `MonthYearPickerModal` for rapid navigation, replacing simple chevron-based swiping.
+- **Header UI Fixes**: Improved calendar header spacing and added a `MonthYearPickerModal` for rapid navigation.
+- **Year Selector Grid**: Enhanced `MonthYearPickerModal` with a clickable year header that toggles to a 12-year grid selection, supporting decade-based navigation.
 
 ## Technical Decisions
 - **Zustand Migration**: Used versioned persist storage in `eventStore.ts` to upgrade legacy data to the new recurrence schema.

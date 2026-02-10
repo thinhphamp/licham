@@ -49,7 +49,7 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
     const [lunarDay, setLunarDay] = useState(initialData?.lunarDay ?? 1);
     const [lunarMonth, setLunarMonth] = useState(initialData?.lunarMonth ?? 1);
     const [isLeapMonth, setIsLeapMonth] = useState(initialData?.isLeapMonth ?? false);
-    const [type, setType] = useState<EventType>(initialData?.type ?? 'gio');
+    const [type, setType] = useState<EventType>(initialData?.type ?? 'personal');
     const [reminderEnabled, setReminderEnabled] = useState(
         initialData?.reminderEnabled ?? true
     );
@@ -179,24 +179,6 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                         style={[
                             styles.typeButton,
                             { borderColor: theme.border },
-                            recurrenceMode === 'recurring' && { borderColor: theme.primary, backgroundColor: theme.selected },
-                        ]}
-                        onPress={() => setRecurrenceMode('recurring')}
-                    >
-                        <Text
-                            style={[
-                                styles.typeText,
-                                { color: theme.textSecondary },
-                                recurrenceMode === 'recurring' && { color: theme.primary, fontWeight: '600' },
-                            ]}
-                        >
-                            🔄 Lặp lại
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[
-                            styles.typeButton,
-                            { borderColor: theme.border },
                             recurrenceMode === 'single' && { borderColor: theme.primary, backgroundColor: theme.selected },
                         ]}
                         onPress={() => setRecurrenceMode('single')}
@@ -209,6 +191,24 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                             ]}
                         >
                             🗓️ Một lần
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.typeButton,
+                            { borderColor: theme.border },
+                            recurrenceMode === 'recurring' && { borderColor: theme.primary, backgroundColor: theme.selected },
+                        ]}
+                        onPress={() => setRecurrenceMode('recurring')}
+                    >
+                        <Text
+                            style={[
+                                styles.typeText,
+                                { color: theme.textSecondary },
+                                recurrenceMode === 'recurring' && { color: theme.primary, fontWeight: '600' },
+                            ]}
+                        >
+                            🔄 Lặp lại
                         </Text>
                     </TouchableOpacity>
                 </View>
