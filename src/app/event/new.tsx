@@ -1,5 +1,6 @@
 import { EventForm } from '@/components/events/EventForm';
 import { useEventsStore } from '@/stores/eventStore';
+import { RecurrenceMode } from '@/types/event';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 
@@ -24,6 +25,7 @@ export default function NewEventScreen() {
             lunarMonth: parseInt(params.lunarMonth, 10),
             lunarYear: params.lunarYear ? parseInt(params.lunarYear, 10) : undefined,
             isLeapMonth: params.isLeapMonth === 'true',
+            recurrenceMode: (params.lunarYear ? 'single' : 'recurring') as RecurrenceMode,
         };
     }, [params]);
 

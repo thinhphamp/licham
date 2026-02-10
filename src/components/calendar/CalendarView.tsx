@@ -1,18 +1,21 @@
 import { useTheme } from '@/constants/theme';
 import { getDayInfo } from '@/services/lunar';
 import { useEventsStore } from '@/stores/eventStore';
+import { isEventOccurring } from '@/utils/recurrence';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { DayCell } from './DayCell';
 import { DayDetailModal } from './DayDetailModal';
+import { MonthYearPickerModal } from './MonthYearPickerModal';
 
 export function CalendarView() {
     const today = new Date().toISOString().split('T')[0];
     const [selectedDate, setSelectedDate] = useState(today);
     const [currentMonth, setCurrentMonth] = useState(today);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isPickerVisible, setIsPickerVisible] = useState(false);
     const events = useEventsStore((state) => state.events);
     const theme = useTheme();
 
@@ -40,12 +43,14 @@ export function CalendarView() {
         if (!date) return null;
 
         const info = getDayInfo(date.day, date.month, date.year);
-        const hasEvent = events.some(
-            (e) =>
-                e.lunarDay === info.lunar.day &&
-                e.lunarMonth === info.lunar.month &&
-                (!e.isLeapMonth || info.lunar.leap)
-        );
+        const solarDate = new Date(date.year, date.month - 1, date.day);
+
+        const hasEvent = events.some((e) => isEventOccurring(e, solarDate, {
+            day: info.lunar.day,
+            month: info.lunar.month,
+            year: info.lunar.year,
+            leap: info.lunar.leap
+        }));
 
         return (
             <DayCell
@@ -117,9 +122,21 @@ export function CalendarView() {
                     const monthName = date.toString('MMMM yyyy');
                     return (
                         <View style={styles.header}>
-                            <Text style={[styles.headerText, { color: theme.text }]}>
-                                {monthName}
-                            </Text>
+                            <TouchableOpacity
+                                style={styles.headerTitleContainer}
+                                onPress={() => setIsPickerVisible(true)}
+                                activeOpacity={0.6}
+                            >
+                                <Text style={[styles.headerText, { color: theme.text }]}>
+                                    {monthName}
+                                </Text>
+                                <Ionicons
+                                    name="chevron-down"
+                                    size={16}
+                                    color={theme.textSecondary}
+                                    style={styles.headerChevron}
+                                />
+                            </TouchableOpacity>
                             <TouchableOpacity
                                 style={[
                                     styles.todayButton,
@@ -135,6 +152,18 @@ export function CalendarView() {
                         </View>
                     );
                 }}
+            />
+
+            <MonthYearPickerModal
+                visible={isPickerVisible}
+                onClose={() => setIsPickerVisible(false)}
+                onSelect={(year, month) => {
+                    const newDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+                    setCurrentMonth(newDate);
+                    setIsPickerVisible(false);
+                }}
+                currentYear={new Date(currentMonth).getFullYear()}
+                currentMonth={new Date(currentMonth).getMonth() + 1}
             />
 
             {dayInfo && (
@@ -157,15 +186,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         width: '100%',
-        paddingHorizontal: 10,
+        paddingHorizontal: 0,
     },
     headerText: {
         fontSize: 18,
         fontWeight: '600',
     },
+    headerTitleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 4,
+    },
+    headerChevron: {
+        marginLeft: 4,
+    },
     todayButton: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
+        flexShrink: 0,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
         borderRadius: 16,
         borderWidth: 1,
         marginLeft: 8,

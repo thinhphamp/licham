@@ -10,7 +10,7 @@ interface EventState {
     addEvent: (data: EventFormData) => Promise<LunarEvent>;
     updateEvent: (id: string, data: Partial<EventFormData>) => Promise<void>;
     deleteEvent: (id: string) => Promise<void>;
-    getEventsForLunarDate: (lunarDay: number, lunarMonth: number) => LunarEvent[];
+    getEventsForLunarDate: (lunarDay: number, lunarMonth: number, lunarYear?: number, solarDate?: Date) => LunarEvent[];
     getEventsForMonth: (lunarMonth: number) => LunarEvent[];
     importEvents: (events: LunarEvent[]) => Promise<void>;
 }
@@ -87,10 +87,16 @@ export const useEventsStore = create<EventState>()(
                 }));
             },
 
-            getEventsForLunarDate: (lunarDay: number, lunarMonth: number) => {
-                return get().events.filter(
-                    (e) => e.lunarDay === lunarDay && e.lunarMonth === lunarMonth
-                );
+            getEventsForLunarDate: (lunarDay: number, lunarMonth: number, lunarYear?: number) => {
+                // This is a legacy helper, primarily for specific lunar matches
+                return get().events.filter((e) => {
+                    if (e.lunarYear !== undefined) {
+                        return e.lunarDay === lunarDay && e.lunarMonth === lunarMonth && e.lunarYear === lunarYear;
+                    }
+                    // For recurring, we just match day/month here. 
+                    // Advanced recurrence should use isEventOccurring utility in UI.
+                    return e.lunarDay === lunarDay && e.lunarMonth === lunarMonth;
+                });
             },
 
             getEventsForMonth: (lunarMonth: number) => {
@@ -130,6 +136,24 @@ export const useEventsStore = create<EventState>()(
         {
             name: 'events-storage',
             storage: createJSONStorage(() => mmkvStorage),
+            version: 1,
+            migrate: (persistedState: any, version: number) => {
+                if (version === 0) {
+                    // Legacy events: lunarYear: undefined means Recurring Yearly Lunar
+                    if (persistedState && persistedState.events) {
+                        persistedState.events = persistedState.events.map((event: any) => {
+                            if (event.lunarYear === undefined && !event.recurrence) {
+                                return {
+                                    ...event,
+                                    recurrence: { frequency: 1, unit: 'year', system: 'lunar' }
+                                };
+                            }
+                            return event;
+                        });
+                    }
+                }
+                return persistedState;
+            },
         }
     )
 );
