@@ -92,7 +92,7 @@ Provides daily lucky hours based on the lunar day's chi element. Useful for cere
 Events attached to lunar dates automatically convert to solar dates and schedule notifications with customizable reminder times.
 
 ## Documentation
-
+- **[Build Xcode & Cài đặt AltStore](docs/build-xcode-altstore.md)** - Hướng dẫn build thủ công khi hết hạn Developer Program
 - **[Project Overview & PDR](docs/project-overview-pdr.md)** - Vision, features, requirements
 - **[Codebase Summary](docs/codebase-summary.md)** - Module breakdown and data flow
 - **[Code Standards](docs/code-standards.md)** - Development guidelines and conventions
