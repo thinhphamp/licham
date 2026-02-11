@@ -4,7 +4,7 @@ import { useEventsStore } from '@/stores/eventStore';
 import { isEventOccurring } from '@/utils/recurrence';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { DayCell } from './DayCell';
 import { DayDetailModal } from './DayDetailModal';
@@ -18,6 +18,7 @@ export function CalendarView() {
     const [isPickerVisible, setIsPickerVisible] = useState(false);
     const events = useEventsStore((state) => state.events);
     const theme = useTheme();
+    const { width: screenWidth } = useWindowDimensions();
 
     const dayInfo = useMemo(() => {
         const date = new Date(selectedDate);
@@ -110,6 +111,16 @@ export function CalendarView() {
                             backgroundColor: theme.background,
                         },
                     },
+                    'stylesheet.calendar.header': {
+                        header: {
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            paddingLeft: 10,
+                            paddingRight: 10,
+                            marginTop: 6,
+                            alignItems: 'center',
+                        },
+                    },
                 }}
                 renderArrow={(direction: string) => (
                     <Ionicons
@@ -121,13 +132,17 @@ export function CalendarView() {
                 renderHeader={(date: any) => {
                     const monthName = date.toString('MMMM yyyy');
                     return (
-                        <View style={styles.header}>
+                        <View style={[styles.header, { width: screenWidth - 100 }]}>
                             <TouchableOpacity
                                 style={styles.headerTitleContainer}
                                 onPress={() => setIsPickerVisible(true)}
                                 activeOpacity={0.6}
                             >
-                                <Text style={[styles.headerText, { color: theme.text }]}>
+                                <Text
+                                    style={[styles.headerText, { color: theme.text }]}
+                                    numberOfLines={1}
+                                    ellipsizeMode="tail"
+                                >
                                     {monthName}
                                 </Text>
                                 <Ionicons
@@ -185,31 +200,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: '100%',
-        paddingHorizontal: 0,
     },
     headerText: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '600',
     },
     headerTitleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 4,
+        flexShrink: 1,
+        marginRight: 8,
     },
     headerChevron: {
-        marginLeft: 4,
+        marginLeft: 2,
     },
     todayButton: {
-        flexShrink: 0,
         paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 16,
+        paddingVertical: 4,
+        borderRadius: 12,
         borderWidth: 1,
-        marginLeft: 8,
+        flexShrink: 0,
     },
     todayButtonText: {
-        fontSize: 13,
+        fontSize: 12, // Reduced from 13
         fontWeight: '600',
     },
 });
