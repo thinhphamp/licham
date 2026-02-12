@@ -2,6 +2,7 @@ import { useTheme } from '@/constants/theme';
 import { exportData, importData } from '@/services/dataService';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import React, { useRef, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -132,7 +133,7 @@ export default function SettingsScreen() {
                 <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Ứng dụng</Text>
                 <View style={[styles.row, { borderBottomColor: theme.border }]}>
                     <Text style={[styles.label, { color: theme.text }]}>Phiên bản</Text>
-                    <Text style={[styles.valueText, { color: theme.textSecondary }]}>1.0.0</Text>
+                    <Text style={[styles.valueText, { color: theme.textSecondary }]}>{Constants.expoConfig?.version ?? '1.0.0'}</Text>
                 </View>
 
                 <TouchableOpacity style={[styles.row, { borderBottomColor: 'transparent' }]}>
