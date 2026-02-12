@@ -1,14 +1,43 @@
 import { useTheme } from '@/constants/theme';
 import { getDayInfo } from '@/services/lunar';
 import { useEventsStore } from '@/stores/eventStore';
-import { isEventOccurring } from '@/utils/recurrence';
+import { getEventsMapForMonth } from '@/utils/calendar';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { DayCell } from './DayCell';
 import { DayDetailModal } from './DayDetailModal';
 import { MonthYearPickerModal } from './MonthYearPickerModal';
+
+// Separate memoized wrapper to prevent unnecessary re-renders of individual day cells
+const CalendarDay = memo(({ date, state, isSelected, hasEvent, onDayPress }: any) => {
+    // We still need info for lunar display, but this is less expensive than checking all events
+    const info = useMemo(() => getDayInfo(date.day, date.month, date.year), [date.day, date.month, date.year]);
+
+    const handlePress = useCallback(() => {
+        onDayPress(date);
+    }, [onDayPress, date]);
+
+    return (
+        <DayCell
+            solarDay={date.day}
+            solarMonth={date.month}
+            solarYear={date.year}
+            lunarDay={info.lunar.day}
+            lunarMonth={info.lunar.month}
+            lunarYear={info.lunar.year}
+            isLeapMonth={info.lunar.leap}
+            isToday={state === 'today'}
+            isSelected={isSelected}
+            isDisabled={state === 'disabled'}
+            isHoliday={!!info.holiday}
+            holidayName={info.holiday?.name}
+            hasEvent={hasEvent}
+            onPress={handlePress}
+        />
+    );
+});
 
 export function CalendarView() {
     const today = new Date().toISOString().split('T')[0];
@@ -25,6 +54,12 @@ export function CalendarView() {
         return getDayInfo(date.getDate(), date.getMonth() + 1, date.getFullYear());
     }, [selectedDate]);
 
+    // Pre-calculate event map for the current month
+    const eventsMap = useMemo(() => {
+        const date = new Date(currentMonth);
+        return getEventsMapForMonth(events, date.getFullYear(), date.getMonth() + 1);
+    }, [events, currentMonth]);
+
     const markedDates = useMemo(() => {
         return {
             [selectedDate]: {
@@ -34,47 +69,40 @@ export function CalendarView() {
         };
     }, [selectedDate]);
 
-    const goToToday = () => {
+    const goToToday = useCallback(() => {
         const now = new Date().toISOString().split('T')[0];
         setSelectedDate(now);
         setCurrentMonth(now);
-    };
+    }, []);
 
-    const renderDay = ({ date, state }: any) => {
+    const handleDayPress = useCallback((date: any) => {
+        setSelectedDate(date.dateString);
+        setIsModalVisible(true);
+    }, []);
+
+    const renderDay = useCallback(({ date, state }: any) => {
         if (!date) return null;
 
-        const info = getDayInfo(date.day, date.month, date.year);
-        const solarDate = new Date(date.year, date.month - 1, date.day);
-
-        const hasEvent = events.some((e) => isEventOccurring(e, solarDate, {
-            day: info.lunar.day,
-            month: info.lunar.month,
-            year: info.lunar.year,
-            leap: info.lunar.leap
-        }));
-
         return (
-            <DayCell
-                solarDay={date.day}
-                solarMonth={date.month}
-                solarYear={date.year}
-                lunarDay={info.lunar.day}
-                lunarMonth={info.lunar.month}
-                lunarYear={info.lunar.year}
-                isLeapMonth={info.lunar.leap}
-                isToday={state === 'today'}
+            <CalendarDay
+                date={date}
+                state={state}
                 isSelected={selectedDate === date.dateString}
-                isDisabled={state === 'disabled'}
-                isHoliday={!!info.holiday}
-                holidayName={info.holiday?.name}
-                hasEvent={hasEvent}
-                onPress={() => {
-                    setSelectedDate(date.dateString);
-                    setIsModalVisible(true);
-                }}
+                hasEvent={!!eventsMap[date.dateString]}
+                onDayPress={handleDayPress}
             />
         );
-    };
+    }, [selectedDate, eventsMap, handleDayPress]);
+
+    const onMonthChange = useCallback((month: DateData) => {
+        setCurrentMonth(month.dateString);
+    }, []);
+
+    const handleMonthSelect = useCallback((year: number, month: number) => {
+        const newDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+        setCurrentMonth(newDate);
+        setIsPickerVisible(false);
+    }, []);
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -83,12 +111,7 @@ export function CalendarView() {
                 current={currentMonth}
                 markedDates={markedDates}
                 dayComponent={renderDay}
-                onDayPress={(day: DateData) => {
-                    setSelectedDate(day.dateString);
-                }}
-                onMonthChange={(month: DateData) => {
-                    setCurrentMonth(month.dateString);
-                }}
+                onMonthChange={onMonthChange}
                 firstDay={1}
                 enableSwipeMonths={true}
                 theme={{
@@ -172,11 +195,7 @@ export function CalendarView() {
             <MonthYearPickerModal
                 visible={isPickerVisible}
                 onClose={() => setIsPickerVisible(false)}
-                onSelect={(year, month) => {
-                    const newDate = `${year}-${month.toString().padStart(2, '0')}-01`;
-                    setCurrentMonth(newDate);
-                    setIsPickerVisible(false);
-                }}
+                onSelect={handleMonthSelect}
                 currentYear={new Date(currentMonth).getFullYear()}
                 currentMonth={new Date(currentMonth).getMonth() + 1}
             />

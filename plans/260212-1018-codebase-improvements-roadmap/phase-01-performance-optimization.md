@@ -7,15 +7,15 @@
 ## Tasks
 
 ### 1.1 Calendar Day Component Memoization
-- [ ] Extract the `renderDay` logic into a new component `DayCellWrapper`.
-- [ ] Use `React.memo` for `DayCellWrapper` with a custom comparison function if necessary.
-- [ ] Stabilize callbacks like `onPress` using `useCallback`.
+- [x] Extract the `renderDay` logic into a new component `DayCellWrapper`.
+- [x] Use `React.memo` for `DayCellWrapper` with a custom comparison function if necessary.
+- [x] Stabilize callbacks like `onPress` using `useCallback`.
 
 ### 1.2 Event Pre-calculation Selector
-- [ ] Implement a memoized selector in `useEventsStore` or a separate utility.
-- [ ] Create a `getEventsMapForMonth(year, month)` function.
-- [ ] The map should be a Record `Record<string, boolean>` where key is `YYYY-MM-DD`.
-- [ ] Update `CalendarView` to use this map instead of calling `isEventOccurring` for every day during render.
+- [x] Implement a memoized selector in `useEventsStore` or a separate utility.
+- [x] Create a `getEventsMapForMonth(year, month)` function.
+- [x] The map should be a Record `Record<string, boolean>` where key is `YYYY-MM-DD`.
+- [x] Update `CalendarView` to use this map instead of calling `isEventOccurring` for every day during render.
 
 ## Code Snippet (Conceptual)
 
