@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Performance Optimization**: Optimized calendar rendering with `CalendarDay` memo component and month-level `eventsMap` pre-calculation (reducing check complexity from O(N) to O(1) per day cell).
 - **Unit Testing**: Integrated Vitest with 100% coverage for core lunar conversion algorithms.
 - **Data Validation**: Integrated Zod for runtime type safety in event forms and state management.
+
+### Documentation
+- Updated `system-architecture.md`, `codebase-summary.md`, and `code-standards.md` to reflect new architecture layers and testing standards.
+
+## [1.1.1] - 2026-02-12
+
+### Added
 - Editable default reminder settings - users can now customize default notification timing.
 
 ### Fixed
@@ -19,7 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version display in settings now reads dynamically from app config.
 
 ### Documentation
-- Updated `system-architecture.md`, `codebase-summary.md`, and `code-standards.md` to reflect new architecture layers and testing standards.
 - Added build-xcode-altstore guide for manual builds.
 
 ## [1.1.0] - 2026-02-10
@@ -49,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript 5.8 in strict mode
 - Platform support: iOS 12+, Android API 24+, Web
 
+[1.2.0]: https://github.com/user/calendar-app/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/user/calendar-app/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/user/calendar-app/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/user/calendar-app/releases/tag/v1.0.0
