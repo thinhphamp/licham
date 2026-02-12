@@ -2,57 +2,112 @@ import { useTheme } from '@/constants/theme';
 import { exportData, importData } from '@/services/dataService';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+// Time options in 30-min intervals
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+    const hours = Math.floor(i / 2).toString().padStart(2, '0');
+    const mins = i % 2 === 0 ? '00' : '30';
+    return `${hours}:${mins}`;
+});
 
 export default function SettingsScreen() {
     const theme = useTheme();
     const {
-        showLunarDates,
-        showAuspiciousHours,
         reminderDaysBefore,
         reminderTime,
-        setShowLunarDates,
-        setShowAuspiciousHours,
+        setReminderDaysBefore,
+        setReminderTime,
     } = useSettingsStore();
+
+    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [daysInput, setDaysInput] = useState(reminderDaysBefore.toString());
+    const timeListRef = useRef<ScrollView>(null);
+
+    const handleDaysChange = (text: string) => {
+        setDaysInput(text);
+        const num = parseInt(text, 10);
+        if (!isNaN(num) && num >= 0) {
+            setReminderDaysBefore(num);
+        }
+    };
 
     return (
         <ScrollView style={[styles.container, { backgroundColor: theme.surfaceAlt }]}>
-            <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
-                <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Hiển thị</Text>
-
-                <View style={[styles.row, { borderBottomColor: theme.border }]}>
-                    <Text style={[styles.label, { color: theme.text }]}>Hiện ngày âm trên lịch</Text>
-                    <Switch
-                        value={showLunarDates}
-                        onValueChange={setShowLunarDates}
-                        trackColor={{ false: theme.border, true: theme.primary }}
-                    />
-                </View>
-
-                <View style={[styles.row, { borderBottomColor: theme.border }]}>
-                    <Text style={[styles.label, { color: theme.text }]}>Hiện giờ hoàng đạo</Text>
-                    <Switch
-                        value={showAuspiciousHours}
-                        onValueChange={setShowAuspiciousHours}
-                        trackColor={{ false: theme.border, true: theme.primary }}
-                    />
-                </View>
-            </View>
-
             <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
                 <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Nhắc nhở mặc định</Text>
 
                 <View style={[styles.row, { borderBottomColor: theme.border }]}>
                     <Text style={[styles.label, { color: theme.text }]}>Nhắc trước (ngày)</Text>
-                    <Text style={[styles.valueText, { color: theme.textSecondary }]}>{reminderDaysBefore}</Text>
+                    <TextInput
+                        style={[styles.input, { color: theme.text, borderColor: theme.border }]}
+                        value={daysInput}
+                        onChangeText={handleDaysChange}
+                        keyboardType="number-pad"
+                        maxLength={2}
+                    />
                 </View>
 
-                <View style={[styles.row, { borderBottomColor: theme.border }]}>
+                <TouchableOpacity
+                    style={[styles.row, { borderBottomColor: theme.border }]}
+                    onPress={() => setShowTimePicker(true)}
+                >
                     <Text style={[styles.label, { color: theme.text }]}>Giờ nhắc</Text>
-                    <Text style={[styles.valueText, { color: theme.textSecondary }]}>{reminderTime}</Text>
-                </View>
+                    <View style={styles.valueRow}>
+                        <Text style={[styles.valueText, { color: theme.textSecondary }]}>{reminderTime}</Text>
+                        <Ionicons name="chevron-forward" size={16} color={theme.border} />
+                    </View>
+                </TouchableOpacity>
             </View>
+
+            {/* Time Picker Modal */}
+            <Modal visible={showTimePicker} transparent animationType="fade">
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowTimePicker(false)}
+                >
+                    <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
+                        <Text style={[styles.modalTitle, { color: theme.text }]}>Chọn giờ nhắc</Text>
+                        <ScrollView
+                            ref={timeListRef}
+                            style={styles.timeList}
+                            onLayout={() => {
+                                const index = TIME_OPTIONS.indexOf(reminderTime);
+                                if (index > 0) {
+                                    timeListRef.current?.scrollTo({ y: index * 45 - 90, animated: false });
+                                }
+                            }}
+                        >
+                            {TIME_OPTIONS.map((time) => (
+                                <TouchableOpacity
+                                    key={time}
+                                    style={[
+                                        styles.timeOption,
+                                        { borderBottomColor: theme.border },
+                                        time === reminderTime && { backgroundColor: theme.selected },
+                                    ]}
+                                    onPress={() => {
+                                        setReminderTime(time);
+                                        setShowTimePicker(false);
+                                    }}
+                                >
+                                    <Text style={[
+                                        styles.timeText,
+                                        { color: time === reminderTime ? theme.primary : theme.text },
+                                    ]}>
+                                        {time}
+                                    </Text>
+                                    {time === reminderTime && (
+                                        <Ionicons name="checkmark" size={20} color={theme.primary} />
+                                    )}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
 
             <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
                 <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Dữ liệu</Text>
@@ -117,6 +172,52 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     valueText: {
+        fontSize: 16,
+    },
+    valueRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    input: {
+        fontSize: 16,
+        textAlign: 'center',
+        borderWidth: 1,
+        borderRadius: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        minWidth: 50,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '80%',
+        maxHeight: '60%',
+        borderRadius: 12,
+        padding: 16,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    timeList: {
+        maxHeight: 300,
+    },
+    timeOption: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+    },
+    timeText: {
         fontSize: 16,
     },
 });

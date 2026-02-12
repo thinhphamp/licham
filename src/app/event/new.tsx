@@ -1,11 +1,33 @@
 import { EventForm } from '@/components/events/EventForm';
 import { useEventsStore } from '@/stores/eventStore';
-import { useRouter } from 'expo-router';
-import React from 'react';
+import { RecurrenceMode } from '@/types/event';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useMemo } from 'react';
 
 export default function NewEventScreen() {
     const router = useRouter();
+    const params = useLocalSearchParams<{
+        lunarDay?: string;
+        lunarMonth?: string;
+        lunarYear?: string;
+        isLeapMonth?: string;
+    }>();
+
     const addEvent = useEventsStore((state) => state.addEvent);
+
+    const initialData = useMemo(() => {
+        if (!params.lunarDay || !params.lunarMonth) {
+            return undefined;
+        }
+
+        return {
+            lunarDay: parseInt(params.lunarDay, 10),
+            lunarMonth: parseInt(params.lunarMonth, 10),
+            lunarYear: params.lunarYear ? parseInt(params.lunarYear, 10) : undefined,
+            isLeapMonth: params.isLeapMonth === 'true',
+            recurrenceMode: (params.lunarYear ? 'single' : 'recurring') as RecurrenceMode,
+        };
+    }, [params]);
 
     const handleSubmit = async (data: any) => {
         await addEvent(data);
@@ -13,6 +35,10 @@ export default function NewEventScreen() {
     };
 
     return (
-        <EventForm onSubmit={handleSubmit} onCancel={() => router.back()} />
+        <EventForm
+            onSubmit={handleSubmit}
+            onCancel={() => router.back()}
+            initialData={initialData}
+        />
     );
 }

@@ -1,20 +1,24 @@
 import { useTheme } from '@/constants/theme';
 import { getDayInfo } from '@/services/lunar';
 import { useEventsStore } from '@/stores/eventStore';
+import { isEventOccurring } from '@/utils/recurrence';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { DayCell } from './DayCell';
 import { DayDetailModal } from './DayDetailModal';
+import { MonthYearPickerModal } from './MonthYearPickerModal';
 
 export function CalendarView() {
-    const [selectedDate, setSelectedDate] = useState(
-        new Date().toISOString().split('T')[0]
-    );
+    const today = new Date().toISOString().split('T')[0];
+    const [selectedDate, setSelectedDate] = useState(today);
+    const [currentMonth, setCurrentMonth] = useState(today);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isPickerVisible, setIsPickerVisible] = useState(false);
     const events = useEventsStore((state) => state.events);
     const theme = useTheme();
+    const { width: screenWidth } = useWindowDimensions();
 
     const dayInfo = useMemo(() => {
         const date = new Date(selectedDate);
@@ -30,16 +34,24 @@ export function CalendarView() {
         };
     }, [selectedDate]);
 
+    const goToToday = () => {
+        const now = new Date().toISOString().split('T')[0];
+        setSelectedDate(now);
+        setCurrentMonth(now);
+    };
+
     const renderDay = ({ date, state }: any) => {
         if (!date) return null;
 
         const info = getDayInfo(date.day, date.month, date.year);
-        const hasEvent = events.some(
-            (e) =>
-                e.lunarDay === info.lunar.day &&
-                e.lunarMonth === info.lunar.month &&
-                (!e.isLeapMonth || info.lunar.leap)
-        );
+        const solarDate = new Date(date.year, date.month - 1, date.day);
+
+        const hasEvent = events.some((e) => isEventOccurring(e, solarDate, {
+            day: info.lunar.day,
+            month: info.lunar.month,
+            year: info.lunar.year,
+            leap: info.lunar.leap
+        }));
 
         return (
             <DayCell
@@ -67,11 +79,15 @@ export function CalendarView() {
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
             <Calendar
-                current={selectedDate}
+                key={currentMonth}
+                current={currentMonth}
                 markedDates={markedDates}
                 dayComponent={renderDay}
                 onDayPress={(day: DateData) => {
                     setSelectedDate(day.dateString);
+                }}
+                onMonthChange={(month: DateData) => {
+                    setCurrentMonth(month.dateString);
                 }}
                 firstDay={1}
                 enableSwipeMonths={true}
@@ -95,6 +111,16 @@ export function CalendarView() {
                             backgroundColor: theme.background,
                         },
                     },
+                    'stylesheet.calendar.header': {
+                        header: {
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            paddingLeft: 10,
+                            paddingRight: 10,
+                            marginTop: 6,
+                            alignItems: 'center',
+                        },
+                    },
                 }}
                 renderArrow={(direction: string) => (
                     <Ionicons
@@ -103,6 +129,56 @@ export function CalendarView() {
                         color={theme.primary}
                     />
                 )}
+                renderHeader={(date: any) => {
+                    const monthName = date.toString('MMMM yyyy');
+                    return (
+                        <View style={[styles.header, { width: screenWidth - 100 }]}>
+                            <TouchableOpacity
+                                style={styles.headerTitleContainer}
+                                onPress={() => setIsPickerVisible(true)}
+                                activeOpacity={0.6}
+                            >
+                                <Text
+                                    style={[styles.headerText, { color: theme.text }]}
+                                    numberOfLines={1}
+                                    ellipsizeMode="tail"
+                                >
+                                    {monthName}
+                                </Text>
+                                <Ionicons
+                                    name="chevron-down"
+                                    size={16}
+                                    color={theme.textSecondary}
+                                    style={styles.headerChevron}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.todayButton,
+                                    { borderColor: theme.today, backgroundColor: theme.isDark ? theme.surface : theme.background }
+                                ]}
+                                onPress={goToToday}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={[styles.todayButtonText, { color: theme.today }]}>
+                                    Hôm nay
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    );
+                }}
+            />
+
+            <MonthYearPickerModal
+                visible={isPickerVisible}
+                onClose={() => setIsPickerVisible(false)}
+                onSelect={(year, month) => {
+                    const newDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+                    setCurrentMonth(newDate);
+                    setIsPickerVisible(false);
+                }}
+                currentYear={new Date(currentMonth).getFullYear()}
+                currentMonth={new Date(currentMonth).getMonth() + 1}
             />
 
             {dayInfo && (
@@ -119,5 +195,35 @@ export function CalendarView() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    headerText: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    headerTitleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 4,
+        flexShrink: 1,
+        marginRight: 8,
+    },
+    headerChevron: {
+        marginLeft: 2,
+    },
+    todayButton: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        borderWidth: 1,
+        flexShrink: 0,
+    },
+    todayButtonText: {
+        fontSize: 12, // Reduced from 13
+        fontWeight: '600',
     },
 });

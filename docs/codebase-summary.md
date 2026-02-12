@@ -26,6 +26,18 @@ Complete overview of the Vietnamese Lunar Calendar app codebase structure, modul
 └──────────────────────────────────────────────────┘
 ```
 
+## Codebase Statistics
+
+**Total Files**: 29 files in src/
+- **src/app/** (10 files): Expo Router pages and navigation
+- **src/components/** (16 files): Reusable UI components
+- **src/stores/** (3 files): State management with Zustand + MMKV
+- **src/services/** (multiple files): Business logic and algorithms
+- **src/hooks/** (custom hooks): Lunar calculations and utilities
+- **src/constants/**, **src/types/**, **src/utils/**: Support files
+
+**Current Version**: 1.1.1
+
 ## Directory Structure & Module Organization
 
 ### App Routes (`src/app/`)
@@ -44,11 +56,12 @@ Complete overview of the Vietnamese Lunar Calendar app codebase structure, modul
 - Platform-specific tab styling (iOS: lighter, Android: material design)
 
 **Calendar Tab** (`(tabs)/index.tsx`)
-- Main calendar view with month/year navigation
-- Integrates CalendarView component
+- Main calendar view with responsive month/year navigation
+- CalendarView with year/month selector grid modal
 - Displays lunar date overlay on solar calendar
 - Quick event indicator (dot/badge on event days)
 - Tap to navigate to DayDetailModal
+- Responsive header design with year/month selectors
 
 **Events Tab** (`(tabs)/events.tsx`)
 - Events list view filtered by lunar month (current month default)
@@ -59,7 +72,10 @@ Complete overview of the Vietnamese Lunar Calendar app codebase structure, modul
 **Settings Tab** (`(tabs)/settings.tsx`)
 - Dark/light theme toggle
 - Lunar display mode (traditional/simplified)
-- Notification preferences (enabled/disabled)
+- Editable reminder settings with UI controls:
+  - Days before reminder (0-30 days configurable)
+  - Time picker modal for reminder time selection
+  - Global notification preferences (enabled/disabled)
 - Data export/import controls
 - App info and version display
 
@@ -299,16 +315,17 @@ Complete overview of the Vietnamese Lunar Calendar app codebase structure, modul
     darkMode: boolean;           // Light/dark theme
     lunarDisplayMode: 'full'|'short'; // Full name or LT abbreviation
     notificationsEnabled: boolean;
-    reminderDaysBefore: number;  // 0-30 days
-    reminderTime: {hour: number; minute: number};
+    reminderDaysBefore: number;  // 0-30 days (default: 1)
+    reminderTime: {hour: number; minute: number}; // Default: 08:00
   }
   ```
 - Actions:
   - `setDarkMode(enabled)`: Toggle theme
   - `setLunarDisplayMode(mode)`: Change display format
   - `setNotificationsEnabled(enabled)`: Enable/disable all notifications
-  - `setReminderDaysBefore(days)`: Default reminder offset
+  - `setReminderDaysBefore(days)`: Default reminder offset (0-30 days)
   - `setReminderTime(hour, minute)`: Default reminder time
+- Applies to all new events and as defaults for event reminders
 
 **Storage Adapter** (`storage.ts`)
 - Bridge between Zustand and MMKV

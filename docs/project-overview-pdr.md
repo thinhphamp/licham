@@ -70,6 +70,10 @@ Lịch Việt provides an all-in-one mobile application for lunar calendar manag
 ### 6. Smart Notification System
 - Automatic scheduling based on lunar date conversion
 - Customizable reminder times (days before, specific time)
+- Global reminder settings with editable UI controls:
+  - Days before reminder: 0-30 days (configurable in Settings)
+  - Reminder time: Selectable via time picker modal
+  - Applied to all new events as defaults
 - Notification delivery via expo-notifications
 - Persistence of notification IDs for management
 - Silent/vibrate mode support
@@ -202,10 +206,12 @@ Lịch Việt provides an all-in-one mobile application for lunar calendar manag
 - ✅ Auspicious hours daily lookup table
 - ✅ CRUD operations for events
 - ✅ Notification scheduling and delivery
+- ✅ Customizable reminder settings (days before, time picker)
 - ✅ 13+ Vietnamese holidays pre-loaded
 - ✅ Dark/light theme toggle
 - ✅ Data export/import functionality
 - ✅ Offline-first with MMKV storage
+- ✅ Year/month selector grid in calendar navigation
 - ✅ iOS and Android builds
 - ✅ Web support
 - ✅ Accessibility compliance

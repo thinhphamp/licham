@@ -33,7 +33,7 @@ npm run web      # Web browser
 
 | Component | Technology |
 |-----------|-----------|
-| Framework | Expo SDK 52, React Native 0.76.9 |
+| Framework | Expo SDK 52, React Native 0.76.9, React 18.3.1 |
 | Navigation | Expo Router 4.0+ |
 | State Management | Zustand 5.0 + MMKV 3.3 |
 | Language | TypeScript 5.8 (strict mode) |
@@ -92,7 +92,7 @@ Provides daily lucky hours based on the lunar day's chi element. Useful for cere
 Events attached to lunar dates automatically convert to solar dates and schedule notifications with customizable reminder times.
 
 ## Documentation
-
+- **[Build Xcode & Cài đặt AltStore](docs/build-xcode-altstore.md)** - Hướng dẫn build thủ công khi hết hạn Developer Program
 - **[Project Overview & PDR](docs/project-overview-pdr.md)** - Vision, features, requirements
 - **[Codebase Summary](docs/codebase-summary.md)** - Module breakdown and data flow
 - **[Code Standards](docs/code-standards.md)** - Development guidelines and conventions

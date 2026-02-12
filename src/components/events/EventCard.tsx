@@ -32,7 +32,7 @@ export function EventCard({ event, onPress }: EventCardProps) {
                     {event.title}
                 </Text>
                 <Text style={[styles.date, { color: theme.textSecondary }]}>
-                    Ngày {event.lunarDay}/{event.lunarMonth} âm lịch
+                    Ngày {event.lunarDay}/{event.lunarMonth}{event.lunarYear ? `/${event.lunarYear}` : ''} âm lịch
                     {event.isLeapMonth ? ' (nhuận)' : ''}
                 </Text>
             </View>
