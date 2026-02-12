@@ -65,13 +65,28 @@ The application follows a strict 4-layer architecture pattern for separation of 
 │                                                               │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │  Persistent Storage (React Native MMKV)              │   │
+│  │  - Events │ Settings │ Cache │ Metadata            │   │
 │  │                                                       │   │
 │  │  - lich-viet-events: Serialized events array         │   │
 │  │  - lich-viet-settings: User preferences              │   │
 │  │  - lich-viet-version: Schema version                 │   │
 │  │  - lich-viet-holidays: Holiday data                  │   │
 │  │  - [notification-id-n]: Notification cache           │   │
+│  │                                                       │   │
 │  └──────────────────────────────────────────────────────┘   │
+└──────────────────────────────┬───────────────────────────────┘
+                               │
+                               ↓
+┌──────────────────────────────────────────────────────────────┐
+│                  Testing & Validation Layer                  │
+│  (Vitest + Zod)                                              │
+│                                                               │
+│  ┌──────────────────────┐  ┌────────────────────┐            │
+│  │  Unit Testing        │  │  Data Validation   │            │
+│  │  - Vitest suite      │  │  - Zod schemas     │            │
+│  │  - Logic coverage    │  │  - Form validation │            │
+│  │  - Algorithm tests   │  │  - Type safety     │            │
+│  └──────────────────────┘  └────────────────────┘            │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -134,6 +149,19 @@ The application follows a strict 4-layer architecture pattern for separation of 
   - Zustand persist middleware handles serialization
   - Manual migrations for schema changes
   - Version tracking for backward compatibility
+
+### Testing & Validation Layer
+- **Purpose**: Ensure code reliability and data integrity
+- **Technology**: Vitest (Unit Testing), Zod (Validation)
+- **Responsibilities**:
+  - Validating business logic and algorithms (Vitest)
+  - Ensuring runtime type safety for user inputs (Zod)
+  - Preventing regressions in core conversion engine
+  - Catching edge cases in leap year/month calculations
+- **Key Files**:
+  - `src/services/lunar/__tests__/converter.test.ts`: Regression tests for lunar algorithms
+  - `src/types/schemas.ts`: Centralized validation logic for events and settings
+  - `vitest.config.ts`: Test environment configuration
 
 ## Lunar Conversion Algorithm
 

@@ -113,6 +113,29 @@ const events = filterByProperty(allEvents, 'category', 'birthday');
 const lunarEvents = filterByProperty(allEvents, 'lunarMonth', 3);
 ```
 
+### Data Validation (Zod)
+We use **Zod** for runtime type safety and form validation. 
+- Schemas live in `src/types/schemas.ts`
+- Use `safeParse()` for form submissions
+- Export input types using `z.infer<typeof Schema>`
+
+```typescript
+// src/types/schemas.ts
+export const EventFormDataSchema = z.object({
+  title: z.string().min(1, 'Title required').max(100),
+  lunarDay: z.number().int().min(1).max(31),
+  // ...
+});
+
+// Usage in Component
+const result = EventFormDataSchema.safeParse(formData);
+if (!result.success) {
+  const error = result.error.issues[0];
+  Alert.alert('Error', error.message);
+  return;
+}
+```
+
 ## Component Standards
 
 ### Functional Components with Hooks
@@ -796,7 +819,35 @@ return (
 6. **Use FlatList** instead of ScrollView for long lists
 7. **Profile with React DevTools Profiler**
 
+### Unit Testing (Vitest)
+- **File Naming**: `__tests__/{filename}.test.ts`
+- **Focus**: Test business logic, algorithms, and store actions
+- **Environment**: Node environment for pure logic tests
+
+```typescript
+// src/services/lunar/__tests__/converter.test.ts
+import { describe, expect, it } from 'vitest';
+import { solarToLunar } from '../converter';
+
+describe('Lunar Converter', () => {
+    it('should correctly convert Solar to Lunar', () => {
+        const result = solarToLunar(12, 2, 2024);
+        expect(result.day).toBe(3);
+        expect(result.month).toBe(1);
+    });
+});
+```
+
 ## Recent Implementation Patterns
+
+#### Optimized Calendar Rendering
+- Use `eventsMap` pre-calculated at the month level.
+- Traversal complexity: Traverses all events once per month change, then O(1) per day cell.
+- Components: `CalendarDay` (memoized) wraps `DayCell`.
+
+#### Zod-Powered Forms
+- Decouple validation logic from UI components.
+- Centralized schemas for consistent error messages.
 
 ### Responsive Calendar Navigation (CalendarView.tsx)
 - Year/month selector grid modal for quick date navigation
