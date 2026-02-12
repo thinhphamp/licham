@@ -5,7 +5,7 @@ All notable changes to Lịch Việt (Vietnamese Lunar Calendar) are documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2026-02-12
+## [1.2.0] - 2026-02-12
 
 ### Added
 - **Performance Optimization**: Optimized calendar rendering with `CalendarDay` memo component and month-level `eventsMap` pre-calculation (reducing check complexity from O(N) to O(1) per day cell).

@@ -519,9 +519,9 @@ Deep integration with related services and advanced capabilities for power users
 | Version | Date | Major Changes |
 |---------|------|---------------|
 | 1.0.0 | 2026-Q1 | MVP Release - Core lunar calendar + events |
-| 1.1.0 | 2026-02-12 | Performance & Reliability Update |
-| 1.1.1 | 2026-02-12 | Calendar Optimization & Unit Testing Suite |
-| 1.2.0 | 2026-03 (Est) | Notification System & Background Refresh |
+| 1.1.0 | 2026-02-12 | Year/month selector grid, editable reminder settings |
+| 1.2.0 | 2026-02-12 | Performance Optimization, Vitest & Zod Integration |
+| 1.3.0 | 2026-03 (Est) | Notification System & Background Refresh |
 | 1.3.0 | 2026-Q2 | Cloud Sync Integration |
 | 2.0.0 | 2026-Q3 | Multi-language + Community |
 | 2.1.0+ | 2026-Q4+ | Advanced Features |
