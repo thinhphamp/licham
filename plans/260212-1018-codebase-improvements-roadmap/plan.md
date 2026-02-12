@@ -31,7 +31,7 @@ This roadmap addresses 10 key technical issues identified to elevate the project
 | Phase | Description | Status |
 |-------|-------------|--------|
 | [Phase 1](./phase-01-performance-optimization.md) | Calendar rendering & Pre-calculation | Pending |
-| [Phase 2](./phase-02-reliability-testing.md) | Unit tests & Validation | Pending |
+| [Phase 2](./phase-02-reliability-testing.md) | Unit tests & Validation | Completed |
 | [Phase 3](./phase-03-notification-system.md) | Recurrence refresh & Background tasks | Pending |
 | [Phase 4](./phase-04-architecture-refactor.md) | Service splitting & Constants cleanup | Pending |
 | [Phase 5](./phase-05-ux-accessibility.md) | Deep linking & A11y | Pending |

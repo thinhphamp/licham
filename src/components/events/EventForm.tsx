@@ -2,6 +2,7 @@ import { useTheme } from '@/constants/theme';
 import { lunarToSolar } from '@/services/lunar';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { DateSystem, EventFormData, EventType, RecurrenceConfig, RecurrenceMode, RecurrenceUnit } from '@/types/event';
+import { EventFormDataSchema } from '@/types/schemas';
 import { Picker } from '@react-native-picker/picker';
 import React, { useMemo, useState } from 'react';
 import {
@@ -74,12 +75,7 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
     }, [lunarDay, lunarMonth, lunarYear, isLeapMonth]);
 
     const handleSubmit = () => {
-        if (!title.trim()) {
-            Alert.alert('Lỗi', 'Vui lòng nhập tên sự kiện');
-            return;
-        }
-
-        onSubmit({
+        const formData = {
             title: title.trim(),
             description: description.trim() || undefined,
             lunarDay,
@@ -92,7 +88,17 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
             reminderEnabled,
             reminderDaysBefore,
             reminderTime,
-        });
+        };
+
+        const result = EventFormDataSchema.safeParse(formData);
+
+        if (!result.success) {
+            const error = result.error.issues[0];
+            Alert.alert('Lỗi', error.message);
+            return;
+        }
+
+        onSubmit(result.data as EventFormData);
     };
 
     const inputStyle = [

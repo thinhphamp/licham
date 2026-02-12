@@ -7,20 +7,20 @@
 ## Tasks
 
 ### 2.1 Unit Testing Suite
-- [ ] Setup Vitest in the React Native project.
-- [ ] Create `src/services/lunar/__tests__/converter.test.ts`.
-- [ ] Add test cases for:
+- [x] Setup Vitest in the React Native project.
+- [x] Create `src/services/lunar/__tests__/converter.test.ts`.
+- [x] Add test cases for:
   - Solar to Lunar (standard dates).
   - Lunar to Solar (standard dates).
   - Leap month handling (e.g., year 2023, 2025).
   - Boundary years (1900, 2099).
-- [ ] Integrate with GitHub Actions (optional, but recommended).
+- [x] Integrate with GitHub Actions (optional, but recommended).
 
 ### 2.2 Zod Schema Integration
-- [ ] Define `EventSchema` using Zod in `src/types/event.ts`.
-- [ ] Implement `EventFormData.validate()` or a separate validator.
-- [ ] Update `EventForm.handleSubmit` to perform validation before adding to store.
-- [ ] Add business rules validation (e.g., `lunarDay` cannot be 31 for month 2, etc.).
+- [x] Define `EventSchema` using Zod in `src/types/schemas.ts`.
+- [x] Implement `EventFormData.validate()` or a separate validator.
+- [x] Update `EventForm.handleSubmit` to perform validation before adding to store.
+- [x] Add business rules validation (e.g., `lunarDay` cannot be 31 for month 2, etc.).
 
 ## Code Snippet (Conceptual)
 
