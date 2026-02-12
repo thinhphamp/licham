@@ -5,16 +5,22 @@ All notable changes to Lịch Việt (Vietnamese Lunar Calendar) are documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2026-02-11
+## [1.1.1] - 2026-02-12
 
 ### Added
-- Editable default reminder settings - users can now customize default notification timing
+- **Performance Optimization**: Optimized calendar rendering with `CalendarDay` memo component and month-level `eventsMap` pre-calculation (reducing check complexity from O(N) to O(1) per day cell).
+- **Unit Testing**: Integrated Vitest with 100% coverage for core lunar conversion algorithms.
+- **Data Validation**: Integrated Zod for runtime type safety in event forms and state management.
+- Editable default reminder settings - users can now customize default notification timing.
 
 ### Fixed
-- Calendar header layout improved for long month names (Vietnamese month names)
+- Calendar header layout improved for long month names (Vietnamese month names).
+- Export/import data service now uses correct expo-file-system v18 API.
+- Version display in settings now reads dynamically from app config.
 
 ### Documentation
-- Added build-xcode-altstore guide for manual builds when Developer Program expires
+- Updated `system-architecture.md`, `codebase-summary.md`, and `code-standards.md` to reflect new architecture layers and testing standards.
+- Added build-xcode-altstore guide for manual builds.
 
 ## [1.1.0] - 2026-02-10
 

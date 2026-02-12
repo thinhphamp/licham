@@ -28,15 +28,16 @@ Complete overview of the Vietnamese Lunar Calendar app codebase structure, modul
 
 ## Codebase Statistics
 
-**Total Files**: 29 files in src/
+**Total Files**: 32 files in src/
 - **src/app/** (10 files): Expo Router pages and navigation
 - **src/components/** (16 files): Reusable UI components
 - **src/stores/** (3 files): State management with Zustand + MMKV
 - **src/services/** (multiple files): Business logic and algorithms
 - **src/hooks/** (custom hooks): Lunar calculations and utilities
 - **src/constants/**, **src/types/**, **src/utils/**: Support files
+- **Testing**: Vitest configuration and unit tests in `__tests__` directories
 
-**Current Version**: 1.1.1
+**Current Version**: 1.1.1 (Phase 1 & 2 Improvements)
 
 ## Directory Structure & Module Organization
 
@@ -60,6 +61,7 @@ Complete overview of the Vietnamese Lunar Calendar app codebase structure, modul
 - CalendarView with year/month selector grid modal
 - Displays lunar date overlay on solar calendar
 - Quick event indicator (dot/badge on event days)
+- Optimized rendering with `CalendarDay` memo component and `eventsMap` pre-calculation
 - Tap to navigate to DayDetailModal
 - Responsive header design with year/month selectors
 
@@ -140,7 +142,8 @@ Complete overview of the Vietnamese Lunar Calendar app codebase structure, modul
   - Category dropdown (Birthday, Ceremony, Holiday, etc.)
   - Reminder configuration (enabled toggle + days before + time picker)
   - Save/cancel buttons
-  - Input validation with error messages
+- Robust input validation using **Zod schema** (`EventFormDataSchema`)
+- Real-time error feedback via Alert or UI indicators
 
 **Common Components** (`common/`)
 - **Button.tsx**: Unified button component
@@ -425,6 +428,11 @@ interface LunarEvent extends EventFormData {
 
 ### Utilities (`src/utils/`)
 
+**calendar.ts**: Calendar rendering helpers
+- `getEventsMapForMonth(events, year, month)`: Pre-calculates event occurrences for a month
+  - Returns: `Record<string, boolean>` (ISO Date -> Has Event)
+  - Complexity: O(DaysInMonth), reducing render-time check from O(N*30) to O(1)
+
 **accessibility.ts**: A11y helper functions
 - `createScreenReaderLabel(text, lang)`: Generates accessible label
   - Vietnamese: "Ngày mồng 1 tháng 1 âm lịch"
@@ -531,11 +539,13 @@ Component renders with cultural colors
 
 ## Testing Strategy
 
-- Unit tests for lunar converter against reference data
-- Component snapshot tests for UI consistency
-- Integration tests for event flow (create → schedule → notify)
-- E2E tests for critical user journeys (calendar nav, event CRUD)
-- Accessibility testing with screen readers
+- **Unit Testing**: Vitest suite for core logic and algorithms
+  - `src/services/lunar/__tests__/converter.test.ts`: 100% coverage for solar/lunar conversions
+- **Data Validation**: Zod schemas for all form inputs and store state
+  - `src/types/schemas.ts`: Shared schemas for events and settings
+- **UI Consistency**: Component snapshot tests (planned)
+- **Integration**: Event flow tests (create → schedule → notify)
+- **Accessibility**: Testing with Screen Reader and WCAG contrast check
 
 ## Security Considerations
 
