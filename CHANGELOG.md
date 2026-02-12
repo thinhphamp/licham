@@ -1,16 +1,48 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to Lịch Việt (Vietnamese Lunar Calendar) are documented in this file.
 
-## [1.1.0] - 2026-02-09
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.1.1] - 2026-02-11
 
 ### Added
-- "Create Event" button in Day Detail modal for quick event creation.
-- Pre-filled lunar date (day, month, year, leap status) when creating events from the calendar.
-- Real-time solar date display in Event Form when selecting lunar dates.
-- "Today" button in calendar header for instant navigation.
-- Comprehensive implementation plans and project reports.
+- Editable default reminder settings - users can now customize default notification timing
 
-### Changed
-- Improved Event Detail modal header with action buttons and themed icons.
-- Updated calendar navigation logic for better user experience.
+### Fixed
+- Calendar header layout improved for long month names (Vietnamese month names)
+
+### Documentation
+- Added build-xcode-altstore guide for manual builds when Developer Program expires
+
+## [1.1.0] - 2026-02-10
+
+### Added
+- Year selector grid in MonthYearPickerModal - easier navigation between years
+- Create event button directly in day modal for faster event creation
+- Solar date display in event form for reference when creating lunar-based events
+
+## [1.0.0] - 2026-02-09
+
+### Added
+- **Lunar Calendar**: Accurate bidirectional solar ↔ lunar conversion using Meeus algorithm
+- **Can-Chi System**: Traditional 60-year cycle with Heavenly Stems, Earthly Branches, and Zodiac animals
+- **Auspicious Hours**: Traditional lucky hours lookup for each lunar day
+- **Event Management**: Create events tied to lunar dates with smart notifications
+- **Vietnamese Holidays**: 13 major national holidays plus monthly observances (Mùng 1, Rằm)
+- **Smart Notifications**: Automatic reminders for events based on lunar dates
+- **Dark Mode**: Complete dark mode support with Vietnamese cultural color theme
+- **Offline-First**: All data stored locally with MMKV, no internet required
+- **Data Sync**: Export/import events as JSON for multi-platform support
+
+### Technical
+- Built with Expo SDK 52, React Native 0.76.9, React 18.3.1
+- Expo Router 4.0+ for file-based navigation
+- Zustand 5.0 + MMKV 3.3 for state management
+- TypeScript 5.8 in strict mode
+- Platform support: iOS 12+, Android API 24+, Web
+
+[1.1.1]: https://github.com/user/calendar-app/compare/v1.1.0...v1.1.1
+[1.1.0]: https://github.com/user/calendar-app/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/user/calendar-app/releases/tag/v1.0.0

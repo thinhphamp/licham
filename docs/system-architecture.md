@@ -25,10 +25,10 @@ The application follows a strict 4-layer architecture pattern for separation of 
 │                                                               │
 │  ┌──────────────────────┐  ┌────────────────────┐            │
 │  │  Events Store        │  │  Settings Store    │            │
-│  │  - CRUD operations   │  │  - Preferences     │            │
-│  │  - Event filtering   │  │  - Theme state     │            │
+│  │  - CRUD operations   │  │  - Dark/light theme│            │
+│  │  - Event filtering   │  │  - Reminder config │            │
 │  │  - Notification sync │  │  - Notification    │            │
-│  │                      │  │    settings        │            │
+│  │                      │  │    preferences     │            │
 │  └──────────┬───────────┘  └────────┬───────────┘            │
 └─────────────┼──────────────────────┼──────────────────────────┘
               │                      │
@@ -103,7 +103,9 @@ The application follows a strict 4-layer architecture pattern for separation of 
   - Triggering notifications on changes
 - **Key Stores**:
   - `useEventsStore`: Events array, CRUD actions, filtering
-  - `useSettingsStore`: User preferences, theme, notification settings
+  - `useSettingsStore`: User preferences, theme, reminder defaults (days before, time), notification settings
+    - Reminder settings applied as defaults to all new events
+    - Editable via Settings UI with time picker modal
 
 ### Service Layer
 - **Purpose**: Business logic and external integrations

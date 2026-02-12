@@ -796,6 +796,21 @@ return (
 6. **Use FlatList** instead of ScrollView for long lists
 7. **Profile with React DevTools Profiler**
 
+## Recent Implementation Patterns
+
+### Responsive Calendar Navigation (CalendarView.tsx)
+- Year/month selector grid modal for quick date navigation
+- Responsive header with selectable year and month
+- Maintains consistency with existing design patterns
+- Uses Zustand for state management
+
+### Settings UI with Time Picker (settings.tsx)
+- Editable reminder settings with numeric input (days before)
+- Time picker modal for selecting reminder time
+- Global settings store integration
+- Settings apply as defaults to new events
+- Pattern: Settings page → Settings store → Event defaults
+
 ## Related Documentation
 
 - See [System Architecture](system-architecture.md) for data flow patterns

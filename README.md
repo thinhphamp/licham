@@ -33,7 +33,7 @@ npm run web      # Web browser
 
 | Component | Technology |
 |-----------|-----------|
-| Framework | Expo SDK 52, React Native 0.76.9 |
+| Framework | Expo SDK 52, React Native 0.76.9, React 18.3.1 |
 | Navigation | Expo Router 4.0+ |
 | State Management | Zustand 5.0 + MMKV 3.3 |
 | Language | TypeScript 5.8 (strict mode) |
