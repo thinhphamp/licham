@@ -1,7 +1,7 @@
 import { useEventsStore } from '@/stores/eventStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import * as DocumentPicker from 'expo-document-picker';
-import { File, Paths } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Alert } from 'react-native';
 
@@ -10,7 +10,6 @@ export async function exportData() {
         const events = useEventsStore.getState().events;
         const settings = useSettingsStore.getState();
 
-        // We only want to export some settings, not the functions
         const settingsToExport = {
             showLunarDates: settings.showLunarDates,
             showAuspiciousHours: settings.showAuspiciousHours,
@@ -26,13 +25,12 @@ export async function exportData() {
         };
 
         const fileName = `lich_viet_backup_${new Date().toISOString().split('T')[0]}.json`;
-        // New API for Expo FileSystem 19+
-        const file = new File(Paths.cache, fileName);
+        const fileUri = FileSystem.cacheDirectory + fileName;
 
-        await file.write(JSON.stringify(data, null, 2));
+        await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(data, null, 2));
 
         if (await Sharing.isAvailableAsync()) {
-            await Sharing.shareAsync(file.uri, {
+            await Sharing.shareAsync(fileUri, {
                 mimeType: 'application/json',
                 dialogTitle: 'Xuất dữ liệu Lịch Việt',
                 UTI: 'public.json',
@@ -55,9 +53,7 @@ export async function importData() {
 
         if (result.canceled) return;
 
-        // New API for Expo FileSystem 19+
-        const file = new File(result.assets[0].uri);
-        const fileContent = await file.text();
+        const fileContent = await FileSystem.readAsStringAsync(result.assets[0].uri);
         const data = JSON.parse(fileContent);
 
         // Basic validation
