@@ -1,15 +1,16 @@
 import { useTheme } from '@/constants/theme';
 import { exportData, importData } from '@/services/dataService';
+import { scheduleTestNotification } from '@/services/notifications';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import React, { useRef, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// Time options in 15-min intervals
-const TIME_OPTIONS = Array.from({ length: 96 }, (_, i) => {
-    const hours = Math.floor(i / 4).toString().padStart(2, '0');
-    const mins = ((i % 4) * 15).toString().padStart(2, '0');
+// Time options in 5-min intervals
+const TIME_OPTIONS = Array.from({ length: 288 }, (_, i) => {
+    const hours = Math.floor(i / 12).toString().padStart(2, '0');
+    const mins = ((i % 12) * 5).toString().padStart(2, '0');
     return `${hours}:${mins}`;
 });
 
@@ -126,6 +127,24 @@ export default function SettingsScreen() {
                 >
                     <Text style={[styles.label, { color: theme.text }]}>Khôi phục dữ liệu (Nhập file)</Text>
                     <Ionicons name="download-outline" size={20} color={theme.primary} />
+                </TouchableOpacity>
+            </View>
+
+            <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Gỡ lỗi (Debug)</Text>
+                <TouchableOpacity
+                    style={[styles.row, { borderBottomColor: 'transparent' }]}
+                    onPress={async () => {
+                        try {
+                            const id = await scheduleTestNotification();
+                            Alert.alert("Thành công", `Đã lên lịch notify (5s): ${id}`);
+                        } catch (e) {
+                            Alert.alert("Lỗi", "Không thể lên lịch thông báo");
+                        }
+                    }}
+                >
+                    <Text style={[styles.label, { color: theme.text }]}>Test thông báo (5s)</Text>
+                    <Ionicons name="notifications-outline" size={20} color={theme.primary} />
                 </TouchableOpacity>
             </View>
 

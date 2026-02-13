@@ -39,15 +39,17 @@ iOS notifications never fire on physical device. Root causes:
 ## Key Files
 
 - `src/app/_layout.tsx` - Add initialization and listeners
-- `src/services/notifications/index.ts` - Add debug functions
-- `app.json` - Verify plugin config (already correct)
+- `src/services/notifications/index.ts` - Add debug functions + Test Logic
+- `src/app/(tabs)/settings.tsx` - Add Test UI
+- `app.json` - Removed empty sound config
 
 ## Success Criteria
 
 - [x] Permissions requested on app startup
-- [x] Notifications fire on physical iOS device
+- [x] Notifications fire on physical iOS device (Verified via Test Button)
 - [x] Tapping notification navigates to event detail
 - [x] Debug logging shows scheduling status
+- [x] Test Notification button added to Settings
 
 ## Risk Assessment
 

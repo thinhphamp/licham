@@ -29,10 +29,10 @@ const currentYear = new Date().getFullYear();
 const LUNAR_YEARS = Array.from({ length: 100 }, (_, i) => currentYear - 20 + i);
 const REMINDER_DAYS = [0, 1, 2, 3, 7, 14];
 
-// 15-minute interval time options for reminder dropdown
-const REMINDER_TIMES = Array.from({ length: 96 }, (_, i) => {
-    const hours = Math.floor(i / 4).toString().padStart(2, '0');
-    const minutes = ((i % 4) * 15).toString().padStart(2, '0');
+// 5-minute interval time options for reminder dropdown
+const REMINDER_TIMES = Array.from({ length: 288 }, (_, i) => {
+    const hours = Math.floor(i / 12).toString().padStart(2, '0');
+    const minutes = ((i % 12) * 5).toString().padStart(2, '0');
     return `${hours}:${minutes}`;
 });
 

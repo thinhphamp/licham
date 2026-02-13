@@ -2,7 +2,6 @@ import { lunarToSolar } from '@/services/lunar';
 import { LunarEvent } from '@/types/event';
 import * as Notifications from 'expo-notifications';
 
-// Configure notification handler
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
         shouldShowAlert: true,
@@ -12,6 +11,33 @@ Notifications.setNotificationHandler({
         shouldShowList: true,
     }),
 });
+
+/**
+ * Schedule a test notification for 5 seconds from now
+ */
+export async function scheduleTestNotification(): Promise<string> {
+    const hasPermission = await requestNotificationPermissions();
+    if (!hasPermission) {
+        console.log('[Notifications] Permission denied for test notification');
+        throw new Error('Permission denied');
+    }
+
+    const trigger = new Date(Date.now() + 5000); // 5s from now
+    const id = await Notifications.scheduleNotificationAsync({
+        content: {
+            title: '📅 Lịch Việt Test',
+            body: 'Thông báo test hoạt động thành công! (5s delay)',
+            sound: true,
+            badge: 1,
+        },
+        trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: trigger,
+        },
+    });
+    console.log('[Notifications] Test scheduled:', id, 'at', trigger.toISOString());
+    return id;
+}
 
 /**
  * Request notification permissions
@@ -51,26 +77,30 @@ export async function scheduleEventNotification(
         event.isLeapMonth
     );
 
-    // If date has passed this year, schedule for next year
-    const solarDate = new Date(solar.year, solar.month - 1, solar.day);
-    if (solarDate < new Date()) {
+    // Helper to calculate trigger date
+    const calculateTriggerDate = (s: { day: number, month: number, year: number }) => {
+        const date = new Date(s.year, s.month - 1, s.day);
+        date.setDate(date.getDate() - event.reminderDaysBefore);
+        const [h, m] = event.reminderTime.split(':').map(Number);
+        date.setHours(h, m, 0, 0);
+        return date;
+    };
+
+    let triggerDate = calculateTriggerDate(solar);
+
+    // If trigger date is in the past AND it's a recurring event (no specific year), try next year
+    if (triggerDate <= new Date() && !event.lunarYear) {
+        console.log('[Notifications] Target passed, checking next year...');
         solar = lunarToSolar(
             event.lunarDay,
             event.lunarMonth,
             targetYear + 1,
             event.isLeapMonth
         );
+        triggerDate = calculateTriggerDate(solar);
     }
 
-    // Calculate trigger date (days before)
-    const triggerDate = new Date(solar.year, solar.month - 1, solar.day);
-    triggerDate.setDate(triggerDate.getDate() - event.reminderDaysBefore);
-
-    // Set reminder time
-    const [hours, minutes] = event.reminderTime.split(':').map(Number);
-    triggerDate.setHours(hours, minutes, 0, 0);
-
-    // Don't schedule if trigger date is in the past
+    // Final check: Don't schedule if trigger date is still in the past
     if (triggerDate <= new Date()) {
         console.log('[Notifications] Trigger date is in the past:', triggerDate);
         return undefined;
