@@ -2,11 +2,14 @@ export type EventType = 'gio' | 'holiday' | 'personal';
 export type RecurrenceMode = 'single' | 'recurring';
 export type RecurrenceUnit = 'day' | 'week' | 'month' | 'year';
 export type DateSystem = 'solar' | 'lunar';
+export type RecurrenceEndType = 'never' | 'on_date';
 
 export interface RecurrenceConfig {
     frequency: number;
     unit: RecurrenceUnit;
     system: DateSystem;
+    endType: RecurrenceEndType;
+    endDate?: string;
 }
 
 export interface LunarEvent {

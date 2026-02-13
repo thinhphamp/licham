@@ -4,6 +4,8 @@ export const RecurrenceConfigSchema = z.object({
     frequency: z.number().int().positive(),
     unit: z.enum(['day', 'week', 'month', 'year']),
     system: z.enum(['solar', 'lunar']),
+    endType: z.enum(['never', 'on_date']),
+    endDate: z.string().optional(),
 });
 
 export const EventTypeSchema = z.enum(['gio', 'holiday', 'personal']);
