@@ -5,6 +5,17 @@ All notable changes to Lịch Việt (Vietnamese Lunar Calendar) are documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-02-13
+
+### Changed
+- **App Icon**: Updated with new Gold/Red Crescent Moon design.
+- **Notification Reliability**: Fixed scheduling logic for same-day reminders and improved permission handling.
+- **Reminder Intervals**: Changed reminder time increments from 15 minutes to 5 minutes.
+- **Sounds**: Removed custom notification sound to rely on system defaults.
+
+### Added
+- **Debug Tools**: Added "Test Notification" button in Settings > Debug.
+
 ## [1.4.0] - 2026-02-13
 
 ### Changed
