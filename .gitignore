@@ -43,3 +43,4 @@ yarn-error.*
 # agent and claude folders
 .agent/
 .claude/
+.claude/
