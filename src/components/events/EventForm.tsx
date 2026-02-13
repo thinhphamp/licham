@@ -29,17 +29,12 @@ const currentYear = new Date().getFullYear();
 const LUNAR_YEARS = Array.from({ length: 100 }, (_, i) => currentYear - 20 + i);
 const REMINDER_DAYS = [0, 1, 2, 3, 7, 14];
 
-// 30-minute interval time options for reminder dropdown
-const REMINDER_TIMES = [
-    '00:00', '00:30', '01:00', '01:30', '02:00', '02:30',
-    '03:00', '03:30', '04:00', '04:30', '05:00', '05:30',
-    '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-    '18:00', '18:30', '19:00', '19:30', '20:00', '20:30',
-    '21:00', '21:30', '22:00', '22:30', '23:00', '23:30',
-];
+// 15-minute interval time options for reminder dropdown
+const REMINDER_TIMES = Array.from({ length: 96 }, (_, i) => {
+    const hours = Math.floor(i / 4).toString().padStart(2, '0');
+    const minutes = ((i % 4) * 15).toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+});
 
 const RECURRENCE_UNITS: { label: string; value: RecurrenceUnit }[] = [
     { label: 'Ngày', value: 'day' },
@@ -87,21 +82,10 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
     const [lunarYear, setLunarYear] = useState(initialData?.lunarYear ?? new Date().getFullYear());
 
     // Recurrence end date states (Solar)
-    const [endDay, setEndDay] = useState(
-        initialData?.recurrence?.endDate
-            ? new Date(initialData.recurrence.endDate).getDate()
-            : new Date().getDate()
-    );
-    const [endMonth, setEndMonth] = useState(
-        initialData?.recurrence?.endDate
-            ? new Date(initialData.recurrence.endDate).getMonth() + 1
-            : new Date().getMonth() + 1
-    );
-    const [endYear, setEndYear] = useState(
-        initialData?.recurrence?.endDate
-            ? new Date(initialData.recurrence.endDate).getFullYear()
-            : new Date().getFullYear() + 1
-    );
+    const initialEndMatch = initialData?.recurrence?.endDate?.split('-').map(Number);
+    const [endDay, setEndDay] = useState(initialEndMatch ? initialEndMatch[2] : new Date().getDate());
+    const [endMonth, setEndMonth] = useState(initialEndMatch ? initialEndMatch[1] : new Date().getMonth() + 1);
+    const [endYear, setEndYear] = useState(initialEndMatch ? initialEndMatch[0] : new Date().getFullYear() + 1);
 
     const solarDate = useMemo(() => {
         const result = lunarToSolar(lunarDay, lunarMonth, lunarYear, isLeapMonth);
@@ -178,10 +162,10 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
             {/* Recurrence Mode */}
             <View style={styles.field}>
                 <Text style={[styles.label, { color: theme.text }]}>Chế độ lặp</Text>
-                <View style={styles.typeButtons}>
+                <View style={styles.segmentButtons}>
                     <TouchableOpacity
                         style={[
-                            styles.typeButton,
+                            styles.segmentButton,
                             { borderColor: theme.border },
                             recurrenceMode === 'single' && { borderColor: theme.primary, backgroundColor: theme.selected },
                         ]}
@@ -189,7 +173,7 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                     >
                         <Text
                             style={[
-                                styles.typeText,
+                                styles.segmentText,
                                 { color: theme.textSecondary },
                                 recurrenceMode === 'single' && { color: theme.primary, fontWeight: '600' },
                             ]}
@@ -199,7 +183,7 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[
-                            styles.typeButton,
+                            styles.segmentButton,
                             { borderColor: theme.border },
                             recurrenceMode === 'recurring' && { borderColor: theme.primary, backgroundColor: theme.selected },
                         ]}
@@ -207,7 +191,7 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                     >
                         <Text
                             style={[
-                                styles.typeText,
+                                styles.segmentText,
                                 { color: theme.textSecondary },
                                 recurrenceMode === 'recurring' && { color: theme.primary, fontWeight: '600' },
                             ]}
@@ -484,18 +468,18 @@ const styles = StyleSheet.create({
         height: 80,
         textAlignVertical: 'top',
     },
-    typeButtons: {
+    segmentButtons: {
         flexDirection: 'row',
         gap: 12,
     },
-    typeButton: {
+    segmentButton: {
         flex: 1,
         padding: 12,
         borderRadius: 8,
         borderWidth: 1,
         alignItems: 'center',
     },
-    typeText: {
+    segmentText: {
         fontSize: 14,
     },
     dateRow: {
