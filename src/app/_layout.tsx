@@ -3,10 +3,10 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { AppState, AppStateStatus, useColorScheme } from 'react-native';
 import 'react-native-reanimated';
 
-import '@/services/notifications'; // Ensure handler is configured early
+import { resetBadgeCount } from '@/services/notifications';
 import { initializeNotifications, useNotificationListeners } from '@/services/notifications/notification-initialization';
 import { initializeStorage } from '@/stores/storage';
 
@@ -26,6 +26,17 @@ export default function RootLayout() {
   useEffect(() => {
     initializeStorage();
     initializeNotifications();
+
+    // Reset badge when app starts or resumes
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        resetBadgeCount();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   useEffect(() => {

@@ -32,6 +32,10 @@ export async function initializeNotifications(): Promise<void> {
                 console.log('[Notifications] iOS auth result:', iosResult.status);
             }
         }
+
+        // Reset badge count on app start
+        await Notifications.setBadgeCountAsync(0);
+        console.log('[Notifications] Badge count reset to 0');
     } catch (error) {
         console.error('[Notifications] Initialization error:', error);
     }
@@ -58,6 +62,7 @@ export function useNotificationListeners(): void {
         responseListener.current = Notifications.addNotificationResponseReceivedListener(
             (response) => {
                 console.log('[Notifications] User response:', response);
+                Notifications.setBadgeCountAsync(0);
 
                 const eventId = response.notification.request.content.data?.eventId;
                 if (eventId && typeof eventId === 'string') {
@@ -72,6 +77,7 @@ export function useNotificationListeners(): void {
         Notifications.getLastNotificationResponseAsync().then((response) => {
             if (response) {
                 console.log('[Notifications] App launched from notification:', response);
+                Notifications.setBadgeCountAsync(0);
                 const eventId = response.notification.request.content.data?.eventId;
                 if (eventId && typeof eventId === 'string') {
                     // Delay navigation to ensure router is ready

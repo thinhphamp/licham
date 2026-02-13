@@ -7,6 +7,8 @@ import { Picker } from '@react-native-picker/picker';
 import React, { useMemo, useState } from 'react';
 import {
     Alert,
+    KeyboardAvoidingView,
+    Platform,
     ScrollView,
     StyleSheet,
     Switch,
@@ -29,12 +31,7 @@ const currentYear = new Date().getFullYear();
 const LUNAR_YEARS = Array.from({ length: 100 }, (_, i) => currentYear - 20 + i);
 const REMINDER_DAYS = [0, 1, 2, 3, 7, 14];
 
-// 5-minute interval time options for reminder dropdown
-const REMINDER_TIMES = Array.from({ length: 288 }, (_, i) => {
-    const hours = Math.floor(i / 12).toString().padStart(2, '0');
-    const minutes = ((i % 12) * 5).toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-});
+
 
 const RECURRENCE_UNITS: { label: string; value: RecurrenceUnit }[] = [
     { label: 'Ngày', value: 'day' },
@@ -131,310 +128,313 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
     ];
 
     return (
-        <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
-            {/* Title */}
-            <View style={styles.field}>
-                <Text style={[styles.label, { color: theme.text }]}>Tên sự kiện *</Text>
-                <TextInput
-                    style={inputStyle}
-                    value={title}
-                    onChangeText={setTitle}
-                    placeholder="VD: Chụp hình gia đình"
-                    placeholderTextColor={theme.textMuted}
-                />
-            </View>
-
-            {/* Description */}
-            <View style={styles.field}>
-                <Text style={[styles.label, { color: theme.text }]}>Ghi chú</Text>
-                <TextInput
-                    style={[inputStyle, styles.multiline]}
-                    value={description}
-                    onChangeText={setDescription}
-                    placeholder="Thêm ghi chú..."
-                    placeholderTextColor={theme.textMuted}
-                    multiline
-                    numberOfLines={3}
-                />
-            </View>
-
-
-            {/* Recurrence Mode */}
-            <View style={styles.field}>
-                <Text style={[styles.label, { color: theme.text }]}>Chế độ lặp</Text>
-                <View style={styles.segmentButtons}>
-                    <TouchableOpacity
-                        style={[
-                            styles.segmentButton,
-                            { borderColor: theme.border },
-                            recurrenceMode === 'single' && { borderColor: theme.primary, backgroundColor: theme.selected },
-                        ]}
-                        onPress={() => setRecurrenceMode('single')}
-                    >
-                        <Text
-                            style={[
-                                styles.segmentText,
-                                { color: theme.textSecondary },
-                                recurrenceMode === 'single' && { color: theme.primary, fontWeight: '600' },
-                            ]}
-                        >
-                            🗓️ Một lần
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[
-                            styles.segmentButton,
-                            { borderColor: theme.border },
-                            recurrenceMode === 'recurring' && { borderColor: theme.primary, backgroundColor: theme.selected },
-                        ]}
-                        onPress={() => setRecurrenceMode('recurring')}
-                    >
-                        <Text
-                            style={[
-                                styles.segmentText,
-                                { color: theme.textSecondary },
-                                recurrenceMode === 'recurring' && { color: theme.primary, fontWeight: '600' },
-                            ]}
-                        >
-                            🔄 Lặp lại
-                        </Text>
-                    </TouchableOpacity>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+        >
+            <ScrollView
+                style={[styles.container, { backgroundColor: theme.background }]}
+                keyboardShouldPersistTaps="handled"
+            >
+                {/* Title */}
+                <View style={styles.field}>
+                    <Text style={[styles.label, { color: theme.text }]}>Tên sự kiện *</Text>
+                    <TextInput
+                        style={inputStyle}
+                        value={title}
+                        onChangeText={setTitle}
+                        placeholder="VD: Chụp hình gia đình"
+                        placeholderTextColor={theme.textMuted}
+                    />
                 </View>
 
-                {recurrenceMode === 'recurring' && (
-                    <View style={styles.recurrenceOptions}>
-                        <View style={styles.recurrenceRow}>
-                            <View style={styles.pickerContainer}>
-                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Đơn vị</Text>
-                                <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
-                                    <Picker
-                                        selectedValue={recurrence.unit}
-                                        onValueChange={(val) => setRecurrence({ ...recurrence, unit: val as RecurrenceUnit })}
-                                        dropdownIconColor={theme.textSecondary}
-                                    >
-                                        {RECURRENCE_UNITS.map((u) => (
-                                            <Picker.Item key={u.value} label={u.label} value={u.value} color={theme.text} />
-                                        ))}
-                                    </Picker>
-                                </View>
-                            </View>
-                            <View style={styles.pickerContainer}>
-                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Hệ lịch</Text>
-                                <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
-                                    <Picker
-                                        selectedValue={recurrence.system}
-                                        onValueChange={(val) => setRecurrence({ ...recurrence, system: val as DateSystem })}
-                                        dropdownIconColor={theme.textSecondary}
-                                    >
-                                        {DATE_SYSTEMS.map((s) => (
-                                            <Picker.Item key={s.value} label={s.label} value={s.value} color={theme.text} />
-                                        ))}
-                                    </Picker>
-                                </View>
-                            </View>
-                        </View>
+                {/* Description */}
+                <View style={styles.field}>
+                    <Text style={[styles.label, { color: theme.text }]}>Ghi chú</Text>
+                    <TextInput
+                        style={[inputStyle, styles.multiline]}
+                        value={description}
+                        onChangeText={setDescription}
+                        placeholder="Thêm ghi chú..."
+                        placeholderTextColor={theme.textMuted}
+                        multiline
+                        numberOfLines={3}
+                    />
+                </View>
 
-                        <View style={[styles.recurrenceRow, { marginTop: 12 }]}>
-                            <View style={styles.pickerContainer}>
-                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Kết thúc lặp</Text>
-                                <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
-                                    <Picker
-                                        selectedValue={recurrence.endType}
-                                        onValueChange={(val) => setRecurrence({ ...recurrence, endType: val as RecurrenceEndType })}
-                                        dropdownIconColor={theme.textSecondary}
-                                    >
-                                        {RECURRENCE_END_TYPES.map((t) => (
-                                            <Picker.Item key={t.value} label={t.label} value={t.value} color={theme.text} />
-                                        ))}
-                                    </Picker>
-                                </View>
-                            </View>
-                        </View>
 
-                        {recurrence.endType === 'on_date' && (
-                            <View style={[styles.dateRow, { marginTop: 12 }]}>
+                {/* Recurrence Mode */}
+                <View style={styles.field}>
+                    <Text style={[styles.label, { color: theme.text }]}>Chế độ lặp</Text>
+                    <View style={styles.segmentButtons}>
+                        <TouchableOpacity
+                            style={[
+                                styles.segmentButton,
+                                { borderColor: theme.border },
+                                recurrenceMode === 'single' && { borderColor: theme.primary, backgroundColor: theme.selected },
+                            ]}
+                            onPress={() => setRecurrenceMode('single')}
+                        >
+                            <Text
+                                style={[
+                                    styles.segmentText,
+                                    { color: theme.textSecondary },
+                                    recurrenceMode === 'single' && { color: theme.primary, fontWeight: '600' },
+                                ]}
+                            >
+                                🗓️ Một lần
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.segmentButton,
+                                { borderColor: theme.border },
+                                recurrenceMode === 'recurring' && { borderColor: theme.primary, backgroundColor: theme.selected },
+                            ]}
+                            onPress={() => setRecurrenceMode('recurring')}
+                        >
+                            <Text
+                                style={[
+                                    styles.segmentText,
+                                    { color: theme.textSecondary },
+                                    recurrenceMode === 'recurring' && { color: theme.primary, fontWeight: '600' },
+                                ]}
+                            >
+                                🔄 Lặp lại
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {recurrenceMode === 'recurring' && (
+                        <View style={styles.recurrenceOptions}>
+                            <View style={styles.recurrenceRow}>
                                 <View style={styles.pickerContainer}>
-                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Ngày kết thúc</Text>
+                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Đơn vị</Text>
                                     <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
                                         <Picker
-                                            selectedValue={endDay}
-                                            onValueChange={(val) => setEndDay(Number(val))}
+                                            selectedValue={recurrence.unit}
+                                            onValueChange={(val) => setRecurrence({ ...recurrence, unit: val as RecurrenceUnit })}
                                             dropdownIconColor={theme.textSecondary}
                                         >
-                                            {SOLAR_DAYS.map((d) => (
-                                                <Picker.Item key={d} label={`${d}`} value={d} color={theme.text} />
+                                            {RECURRENCE_UNITS.map((u) => (
+                                                <Picker.Item key={u.value} label={u.label} value={u.value} color={theme.text} />
                                             ))}
                                         </Picker>
                                     </View>
                                 </View>
                                 <View style={styles.pickerContainer}>
-                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Tháng kết thúc</Text>
+                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Hệ lịch</Text>
                                     <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
                                         <Picker
-                                            selectedValue={endMonth}
-                                            onValueChange={(val) => setEndMonth(Number(val))}
+                                            selectedValue={recurrence.system}
+                                            onValueChange={(val) => setRecurrence({ ...recurrence, system: val as DateSystem })}
                                             dropdownIconColor={theme.textSecondary}
                                         >
-                                            {LUNAR_MONTHS.map((m) => (
-                                                <Picker.Item key={m} label={`${m}`} value={m} color={theme.text} />
-                                            ))}
-                                        </Picker>
-                                    </View>
-                                </View>
-                                <View style={styles.pickerContainer}>
-                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Năm kết thúc</Text>
-                                    <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
-                                        <Picker
-                                            selectedValue={endYear}
-                                            onValueChange={(val) => setEndYear(Number(val))}
-                                            dropdownIconColor={theme.textSecondary}
-                                        >
-                                            {LUNAR_YEARS.map((y) => (
-                                                <Picker.Item key={y} label={`${y}`} value={y} color={theme.text} />
+                                            {DATE_SYSTEMS.map((s) => (
+                                                <Picker.Item key={s.value} label={s.label} value={s.value} color={theme.text} />
                                             ))}
                                         </Picker>
                                     </View>
                                 </View>
                             </View>
-                        )}
+
+                            <View style={[styles.recurrenceRow, { marginTop: 12 }]}>
+                                <View style={styles.pickerContainer}>
+                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Kết thúc lặp</Text>
+                                    <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                        <Picker
+                                            selectedValue={recurrence.endType}
+                                            onValueChange={(val) => setRecurrence({ ...recurrence, endType: val as RecurrenceEndType })}
+                                            dropdownIconColor={theme.textSecondary}
+                                        >
+                                            {RECURRENCE_END_TYPES.map((t) => (
+                                                <Picker.Item key={t.value} label={t.label} value={t.value} color={theme.text} />
+                                            ))}
+                                        </Picker>
+                                    </View>
+                                </View>
+                            </View>
+
+                            {recurrence.endType === 'on_date' && (
+                                <View style={[styles.dateRow, { marginTop: 12 }]}>
+                                    <View style={styles.pickerContainer}>
+                                        <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Ngày kết thúc</Text>
+                                        <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                            <Picker
+                                                selectedValue={endDay}
+                                                onValueChange={(val) => setEndDay(Number(val))}
+                                                dropdownIconColor={theme.textSecondary}
+                                            >
+                                                {SOLAR_DAYS.map((d) => (
+                                                    <Picker.Item key={d} label={`${d}`} value={d} color={theme.text} />
+                                                ))}
+                                            </Picker>
+                                        </View>
+                                    </View>
+                                    <View style={styles.pickerContainer}>
+                                        <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Tháng kết thúc</Text>
+                                        <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                            <Picker
+                                                selectedValue={endMonth}
+                                                onValueChange={(val) => setEndMonth(Number(val))}
+                                                dropdownIconColor={theme.textSecondary}
+                                            >
+                                                {LUNAR_MONTHS.map((m) => (
+                                                    <Picker.Item key={m} label={`${m}`} value={m} color={theme.text} />
+                                                ))}
+                                            </Picker>
+                                        </View>
+                                    </View>
+                                    <View style={styles.pickerContainer}>
+                                        <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Năm kết thúc</Text>
+                                        <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                            <Picker
+                                                selectedValue={endYear}
+                                                onValueChange={(val) => setEndYear(Number(val))}
+                                                dropdownIconColor={theme.textSecondary}
+                                            >
+                                                {LUNAR_YEARS.map((y) => (
+                                                    <Picker.Item key={y} label={`${y}`} value={y} color={theme.text} />
+                                                ))}
+                                            </Picker>
+                                        </View>
+                                    </View>
+                                </View>
+                            )}
+                        </View>
+                    )}
+                </View>
+
+                {/* Solar Date Display - FIRST */}
+                {solarDate && (
+                    <View style={[styles.field, styles.solarDateField]}>
+                        <Text style={[styles.label, { color: theme.text, marginBottom: 0 }]}>Ngày dương lịch</Text>
+                        <Text style={[styles.solarDateValue, { color: theme.textSecondary }]}>
+                            {solarDate.day.toString().padStart(2, '0')}/{solarDate.month.toString().padStart(2, '0')}/{solarDate.year}
+                        </Text>
                     </View>
                 )}
-            </View>
 
-            {/* Solar Date Display - FIRST */}
-            {solarDate && (
-                <View style={[styles.field, styles.solarDateField]}>
-                    <Text style={[styles.label, { color: theme.text, marginBottom: 0 }]}>Ngày dương lịch</Text>
-                    <Text style={[styles.solarDateValue, { color: theme.textSecondary }]}>
-                        {solarDate.day.toString().padStart(2, '0')}/{solarDate.month.toString().padStart(2, '0')}/{solarDate.year}
-                    </Text>
-                </View>
-            )}
-
-            {/* Lunar Date */}
-            <View style={styles.field}>
-                <Text style={[styles.label, { color: theme.text }]}>Ngày âm lịch</Text>
-                <View style={styles.dateRow}>
-                    <View style={styles.pickerContainer}>
-                        <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Ngày</Text>
-                        <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
-                            <Picker
-                                selectedValue={lunarDay}
-                                onValueChange={(val) => setLunarDay(Number(val))}
-                                dropdownIconColor={theme.textSecondary}
-                            >
-                                {LUNAR_DAYS.map((d) => (
-                                    <Picker.Item key={d} label={`${d}`} value={d} color={theme.text} />
-                                ))}
-                            </Picker>
-                        </View>
-                    </View>
-                    <View style={styles.pickerContainer}>
-                        <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Tháng</Text>
-                        <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
-                            <Picker
-                                selectedValue={lunarMonth}
-                                onValueChange={(val) => setLunarMonth(Number(val))}
-                                dropdownIconColor={theme.textSecondary}
-                            >
-                                {LUNAR_MONTHS.map((m) => (
-                                    <Picker.Item key={m} label={`${m}`} value={m} color={theme.text} />
-                                ))}
-                            </Picker>
-                        </View>
-                    </View>
-                    {recurrenceMode === 'single' && (
+                {/* Lunar Date */}
+                <View style={styles.field}>
+                    <Text style={[styles.label, { color: theme.text }]}>Ngày âm lịch</Text>
+                    <View style={styles.dateRow}>
                         <View style={styles.pickerContainer}>
-                            <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Năm</Text>
+                            <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Ngày</Text>
                             <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
                                 <Picker
-                                    selectedValue={lunarYear}
-                                    onValueChange={(val) => setLunarYear(Number(val))}
+                                    selectedValue={lunarDay}
+                                    onValueChange={(val) => setLunarDay(Number(val))}
                                     dropdownIconColor={theme.textSecondary}
                                 >
-                                    {LUNAR_YEARS.map((y) => (
-                                        <Picker.Item key={y} label={`${y}`} value={y} color={theme.text} />
+                                    {LUNAR_DAYS.map((d) => (
+                                        <Picker.Item key={d} label={`${d}`} value={d} color={theme.text} />
                                     ))}
                                 </Picker>
                             </View>
                         </View>
-                    )}
-                </View>
-            </View>
-
-            {/* Reminder */}
-            <View style={styles.field}>
-                <View style={styles.switchRow}>
-                    <Text style={[styles.label, { color: theme.text }]}>Nhắc nhở</Text>
-                    <Switch
-                        value={reminderEnabled}
-                        onValueChange={setReminderEnabled}
-                        trackColor={{ false: theme.border, true: theme.primary }}
-                    />
-                </View>
-
-                {reminderEnabled && (
-                    <View style={styles.reminderOptions}>
-                        <View style={styles.reminderRow}>
+                        <View style={styles.pickerContainer}>
+                            <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Tháng</Text>
+                            <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                <Picker
+                                    selectedValue={lunarMonth}
+                                    onValueChange={(val) => setLunarMonth(Number(val))}
+                                    dropdownIconColor={theme.textSecondary}
+                                >
+                                    {LUNAR_MONTHS.map((m) => (
+                                        <Picker.Item key={m} label={`${m}`} value={m} color={theme.text} />
+                                    ))}
+                                </Picker>
+                            </View>
+                        </View>
+                        {recurrenceMode === 'single' && (
                             <View style={styles.pickerContainer}>
-                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Nhắc trước</Text>
+                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Năm</Text>
                                 <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
                                     <Picker
-                                        selectedValue={reminderDaysBefore}
-                                        onValueChange={(val) => setReminderDaysBefore(Number(val))}
+                                        selectedValue={lunarYear}
+                                        onValueChange={(val) => setLunarYear(Number(val))}
                                         dropdownIconColor={theme.textSecondary}
                                     >
-                                        {REMINDER_DAYS.map((d) => (
-                                            <Picker.Item
-                                                key={d}
-                                                label={d === 0 ? 'Trong ngày' : `${d} ngày`}
-                                                value={d}
-                                                color={theme.text}
-                                            />
+                                        {LUNAR_YEARS.map((y) => (
+                                            <Picker.Item key={y} label={`${y}`} value={y} color={theme.text} />
                                         ))}
                                     </Picker>
                                 </View>
                             </View>
-                            <View style={styles.pickerContainer}>
-                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Giờ nhắc</Text>
-                                <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
-                                    <Picker
-                                        selectedValue={reminderTime}
-                                        onValueChange={(val) => setReminderTime(val as string)}
-                                        dropdownIconColor={theme.textSecondary}
-                                    >
-                                        {REMINDER_TIMES.map((time) => (
-                                            <Picker.Item
-                                                key={time}
-                                                label={time}
-                                                value={time}
-                                                color={theme.text}
-                                            />
-                                        ))}
-                                    </Picker>
+                        )}
+                    </View>
+                </View>
+
+                {/* Reminder */}
+                <View style={styles.field}>
+                    <View style={styles.switchRow}>
+                        <Text style={[styles.label, { color: theme.text }]}>Nhắc nhở</Text>
+                        <Switch
+                            value={reminderEnabled}
+                            onValueChange={setReminderEnabled}
+                            trackColor={{ false: theme.border, true: theme.primary }}
+                        />
+                    </View>
+
+                    {reminderEnabled && (
+                        <View style={styles.reminderOptions}>
+                            <View style={styles.reminderRow}>
+                                <View style={styles.pickerContainer}>
+                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Nhắc trước</Text>
+                                    <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                        <Picker
+                                            selectedValue={reminderDaysBefore}
+                                            onValueChange={(val) => setReminderDaysBefore(Number(val))}
+                                            dropdownIconColor={theme.textSecondary}
+                                        >
+                                            {REMINDER_DAYS.map((d) => (
+                                                <Picker.Item
+                                                    key={d}
+                                                    label={d === 0 ? 'Trong ngày' : `${d} ngày`}
+                                                    value={d}
+                                                    color={theme.text}
+                                                />
+                                            ))}
+                                        </Picker>
+                                    </View>
+                                </View>
+                                <View style={styles.pickerContainer}>
+                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Giờ nhắc</Text>
+                                    <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                        <TextInput
+                                            style={[styles.input, { color: theme.text, borderColor: theme.border, backgroundColor: theme.surface, textAlign: 'center' }]}
+                                            value={reminderTime}
+                                            onChangeText={setReminderTime}
+                                            placeholder="HH:mm"
+                                            maxLength={5}
+                                            keyboardType="numbers-and-punctuation"
+                                        />
+                                    </View>
                                 </View>
                             </View>
                         </View>
-                    </View>
-                )}
-            </View>
+                    )}
+                </View>
 
-            {/* Buttons */}
-            <View style={styles.buttons}>
-                <TouchableOpacity
-                    style={[styles.cancelButton, { borderColor: theme.border }]}
-                    onPress={onCancel}
-                >
-                    <Text style={[styles.cancelText, { color: theme.textSecondary }]}>Hủy</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.submitButton, { backgroundColor: theme.primary }]}
-                    onPress={handleSubmit}
-                >
-                    <Text style={styles.submitText}>Lưu</Text>
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+                {/* Buttons */}
+                <View style={styles.buttons}>
+                    <TouchableOpacity
+                        style={[styles.cancelButton, { borderColor: theme.border }]}
+                        onPress={onCancel}
+                    >
+                        <Text style={[styles.cancelText, { color: theme.textSecondary }]}>Hủy</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.submitButton, { backgroundColor: theme.primary }]}
+                        onPress={handleSubmit}
+                    >
+                        <Text style={styles.submitText}>Lưu</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 

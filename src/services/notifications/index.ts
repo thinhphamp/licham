@@ -151,6 +151,14 @@ export async function cancelAllNotifications(): Promise<void> {
 }
 
 /**
+ * Reset the app icon badge count to 0
+ */
+export async function resetBadgeCount(): Promise<void> {
+    console.log('[Notifications] Resetting badge count');
+    await Notifications.setBadgeCountAsync(0);
+}
+
+/**
  * Debug utility: Get all scheduled notifications.
  */
 export async function debugGetAllScheduledNotifications(): Promise<Notifications.NotificationRequest[]> {

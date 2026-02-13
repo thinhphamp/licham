@@ -4,15 +4,10 @@ import { scheduleTestNotification } from '@/services/notifications';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import React, { useRef, useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// Time options in 5-min intervals
-const TIME_OPTIONS = Array.from({ length: 288 }, (_, i) => {
-    const hours = Math.floor(i / 12).toString().padStart(2, '0');
-    const mins = ((i % 12) * 5).toString().padStart(2, '0');
-    return `${hours}:${mins}`;
-});
+
 
 export default function SettingsScreen() {
     const theme = useTheme();
@@ -23,9 +18,8 @@ export default function SettingsScreen() {
         setReminderTime,
     } = useSettingsStore();
 
-    const [showTimePicker, setShowTimePicker] = useState(false);
     const [daysInput, setDaysInput] = useState(reminderDaysBefore.toString());
-    const timeListRef = useRef<ScrollView>(null);
+    const [timeInput, setTimeInput] = useState(reminderTime);
 
     const handleDaysChange = (text: string) => {
         setDaysInput(text);
@@ -35,132 +29,103 @@ export default function SettingsScreen() {
         }
     };
 
+    const handleTimeChange = (text: string) => {
+        setTimeInput(text);
+        if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(text)) {
+            setReminderTime(text);
+        }
+    };
+
     return (
-        <ScrollView style={[styles.container, { backgroundColor: theme.surfaceAlt }]}>
-            <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
-                <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Nhắc nhở mặc định</Text>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
+        >
+            <ScrollView
+                style={[styles.container, { backgroundColor: theme.surfaceAlt }]}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                    <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Nhắc nhở mặc định</Text>
 
-                <View style={[styles.row, { borderBottomColor: theme.border }]}>
-                    <Text style={[styles.label, { color: theme.text }]}>Nhắc trước (ngày)</Text>
-                    <TextInput
-                        style={[styles.input, { color: theme.text, borderColor: theme.border }]}
-                        value={daysInput}
-                        onChangeText={handleDaysChange}
-                        keyboardType="number-pad"
-                        maxLength={2}
-                    />
+                    <View style={[styles.row, { borderBottomColor: theme.border }]}>
+                        <Text style={[styles.label, { color: theme.text }]}>Nhắc trước (ngày)</Text>
+                        <TextInput
+                            style={[styles.input, { color: theme.text, borderColor: theme.border }]}
+                            value={daysInput}
+                            onChangeText={handleDaysChange}
+                            keyboardType="number-pad"
+                            maxLength={2}
+                        />
+                    </View>
+
+                    <View style={[styles.row, { borderBottomColor: theme.border }]}>
+                        <Text style={[styles.label, { color: theme.text }]}>Giờ nhắc</Text>
+                        <TextInput
+                            style={[styles.input, { color: theme.text, borderColor: theme.border, minWidth: 80 }]}
+                            value={timeInput}
+                            onChangeText={handleTimeChange}
+                            placeholder="HH:mm"
+                            maxLength={5}
+                            keyboardType="numbers-and-punctuation"
+                        />
+                    </View>
                 </View>
 
-                <TouchableOpacity
-                    style={[styles.row, { borderBottomColor: theme.border }]}
-                    onPress={() => setShowTimePicker(true)}
-                >
-                    <Text style={[styles.label, { color: theme.text }]}>Giờ nhắc</Text>
-                    <View style={styles.valueRow}>
-                        <Text style={[styles.valueText, { color: theme.textSecondary }]}>{reminderTime}</Text>
-                        <Ionicons name="chevron-forward" size={16} color={theme.border} />
-                    </View>
-                </TouchableOpacity>
-            </View>
 
-            {/* Time Picker Modal */}
-            <Modal visible={showTimePicker} transparent animationType="fade">
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={() => setShowTimePicker(false)}
-                >
-                    <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
-                        <Text style={[styles.modalTitle, { color: theme.text }]}>Chọn giờ nhắc</Text>
-                        <ScrollView
-                            ref={timeListRef}
-                            style={styles.timeList}
-                            onLayout={() => {
-                                const index = TIME_OPTIONS.indexOf(reminderTime);
-                                if (index > 0) {
-                                    timeListRef.current?.scrollTo({ y: index * 45 - 90, animated: false });
-                                }
-                            }}
-                        >
-                            {TIME_OPTIONS.map((time) => (
-                                <TouchableOpacity
-                                    key={time}
-                                    style={[
-                                        styles.timeOption,
-                                        { borderBottomColor: theme.border },
-                                        time === reminderTime && { backgroundColor: theme.selected },
-                                    ]}
-                                    onPress={() => {
-                                        setReminderTime(time);
-                                        setShowTimePicker(false);
-                                    }}
-                                >
-                                    <Text style={[
-                                        styles.timeText,
-                                        { color: time === reminderTime ? theme.primary : theme.text },
-                                    ]}>
-                                        {time}
-                                    </Text>
-                                    {time === reminderTime && (
-                                        <Ionicons name="checkmark" size={20} color={theme.primary} />
-                                    )}
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
 
-            <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
-                <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Dữ liệu</Text>
-                <TouchableOpacity
-                    style={[styles.row, { borderBottomColor: theme.border }]}
-                    onPress={exportData}
-                >
-                    <Text style={[styles.label, { color: theme.text }]}>Sao lưu dữ liệu (Xuất file)</Text>
-                    <Ionicons name="share-outline" size={20} color={theme.primary} />
-                </TouchableOpacity>
+                <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                    <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Dữ liệu</Text>
+                    <TouchableOpacity
+                        style={[styles.row, { borderBottomColor: theme.border }]}
+                        onPress={exportData}
+                    >
+                        <Text style={[styles.label, { color: theme.text }]}>Sao lưu dữ liệu (Xuất file)</Text>
+                        <Ionicons name="share-outline" size={20} color={theme.primary} />
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={[styles.row, { borderBottomColor: 'transparent' }]}
-                    onPress={importData}
-                >
-                    <Text style={[styles.label, { color: theme.text }]}>Khôi phục dữ liệu (Nhập file)</Text>
-                    <Ionicons name="download-outline" size={20} color={theme.primary} />
-                </TouchableOpacity>
-            </View>
-
-            <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
-                <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Gỡ lỗi (Debug)</Text>
-                <TouchableOpacity
-                    style={[styles.row, { borderBottomColor: 'transparent' }]}
-                    onPress={async () => {
-                        try {
-                            const id = await scheduleTestNotification();
-                            Alert.alert("Thành công", `Đã lên lịch notify (5s): ${id}`);
-                        } catch (e) {
-                            Alert.alert("Lỗi", "Không thể lên lịch thông báo");
-                        }
-                    }}
-                >
-                    <Text style={[styles.label, { color: theme.text }]}>Test thông báo (5s)</Text>
-                    <Ionicons name="notifications-outline" size={20} color={theme.primary} />
-                </TouchableOpacity>
-            </View>
-
-            <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
-                <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Ứng dụng</Text>
-                <View style={[styles.row, { borderBottomColor: theme.border }]}>
-                    <Text style={[styles.label, { color: theme.text }]}>Phiên bản</Text>
-                    <Text style={[styles.valueText, { color: theme.textSecondary }]}>{Constants.expoConfig?.version ?? '1.0.0'}</Text>
+                    <TouchableOpacity
+                        style={[styles.row, { borderBottomColor: 'transparent' }]}
+                        onPress={importData}
+                    >
+                        <Text style={[styles.label, { color: theme.text }]}>Khôi phục dữ liệu (Nhập file)</Text>
+                        <Ionicons name="download-outline" size={20} color={theme.primary} />
+                    </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity style={[styles.row, { borderBottomColor: 'transparent' }]}>
-                    <Text style={[styles.label, { color: theme.text }]}>Phản hồi & Góp ý</Text>
-                    <Ionicons name="chevron-forward" size={20} color={theme.border} />
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+                <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                    <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Gỡ lỗi (Debug)</Text>
+                    <TouchableOpacity
+                        style={[styles.row, { borderBottomColor: 'transparent' }]}
+                        onPress={async () => {
+                            try {
+                                const id = await scheduleTestNotification();
+                                Alert.alert("Thành công", `Đã lên lịch notify (5s): ${id}`);
+                            } catch (e) {
+                                Alert.alert("Lỗi", "Không thể lên lịch thông báo");
+                            }
+                        }}
+                    >
+                        <Text style={[styles.label, { color: theme.text }]}>Test thông báo (5s)</Text>
+                        <Ionicons name="notifications-outline" size={20} color={theme.primary} />
+                    </TouchableOpacity>
+                </View>
+
+                <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                    <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Ứng dụng</Text>
+                    <View style={[styles.row, { borderBottomColor: theme.border }]}>
+                        <Text style={[styles.label, { color: theme.text }]}>Phiên bản</Text>
+                        <Text style={[styles.valueText, { color: theme.textSecondary }]}>{Constants.expoConfig?.version ?? '1.0.0'}</Text>
+                    </View>
+
+                    <TouchableOpacity style={[styles.row, { borderBottomColor: 'transparent' }]}>
+                        <Text style={[styles.label, { color: theme.text }]}>Phản hồi & Góp ý</Text>
+                        <Ionicons name="chevron-forward" size={20} color={theme.border} />
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 

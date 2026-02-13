@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **App Icon**: Updated with new Gold/Red Crescent Moon design.
 - **Notification Reliability**: Fixed scheduling logic for same-day reminders and improved permission handling.
-- **Reminder Intervals**: Changed reminder time increments from 15 minutes to 5 minutes.
+- **Reminder Input**: Replaced 5-minute interval dropdown with direct manual manual time input (`HH:mm`) for faster scheduling.
+- **Badge Management**: Implemented automatic app icon badge reset when opening or resuming the app.
 - **Sounds**: Removed custom notification sound to rely on system defaults.
 
 ### Added
+- **UI/UX**: Added `KeyboardAvoidingView` to prevent the keyboard from covering input fields on smaller screens.
 - **Debug Tools**: Added "Test Notification" button in Settings > Debug.
 
 ## [1.4.0] - 2026-02-13
