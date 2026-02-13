@@ -5,6 +5,14 @@ All notable changes to Lịch Việt (Vietnamese Lunar Calendar) are documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-13
+
+### Changed
+- **Event Form UI**: Simplified form by removing leap month checkbox (auto-detected).
+- **Event Form UI**: Reordered date picker fields for better usability.
+- **Alert Dropdown**: Replaced text input with 30-minute interval time dropdown.
+- **End Repeat Options**: Replaced frequency field with "End Repeat" options (Never, On Date).
+
 ## [1.2.0] - 2026-02-12
 
 ### Added
@@ -55,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript 5.8 in strict mode
 - Platform support: iOS 12+, Android API 24+, Web
 
+[1.3.0]: https://github.com/user/calendar-app/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/user/calendar-app/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/user/calendar-app/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/user/calendar-app/compare/v1.0.0...v1.1.0
