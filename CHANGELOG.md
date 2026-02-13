@@ -5,13 +5,15 @@ All notable changes to Lịch Việt (Vietnamese Lunar Calendar) are documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-02-13
+## [1.4.0] - 2026-02-13
 
 ### Changed
-- **Event Form UI**: Simplified form by removing leap month checkbox (auto-detected).
-- **Event Form UI**: Reordered date picker fields for better usability.
-- **Alert Dropdown**: Replaced text input with 30-minute interval time dropdown.
-- **End Repeat Options**: Replaced frequency field with "End Repeat" options (Never, On Date).
+- **Event Form UI**: Simplified form by removing leap month switch and event type selection.
+- **Event Form UI**: Reordered date picker fields and optimized layouts for better vertical flow.
+- **Reminder Options**: Upgraded alert time picker to 15-minute intervals (available in Event Form and Settings).
+- **Recurrence**: Replaced frequency field with "End Repeat" options (Never, On Date).
+- **iOS Notifications**: Fixed notification reliability on iOS with initialization logic, listeners, and tap handling.
+- **Debugging**: Added internal notification debugging utilities and logging.
 
 ## [1.2.0] - 2026-02-12
 

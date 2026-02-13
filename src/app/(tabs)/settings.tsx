@@ -6,10 +6,10 @@ import Constants from 'expo-constants';
 import React, { useRef, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// Time options in 30-min intervals
-const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
-    const hours = Math.floor(i / 2).toString().padStart(2, '0');
-    const mins = i % 2 === 0 ? '00' : '30';
+// Time options in 15-min intervals
+const TIME_OPTIONS = Array.from({ length: 96 }, (_, i) => {
+    const hours = Math.floor(i / 4).toString().padStart(2, '0');
+    const mins = ((i % 4) * 15).toString().padStart(2, '0');
     return `${hours}:${mins}`;
 });
 

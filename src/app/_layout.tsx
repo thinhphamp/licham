@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import 'react-native-reanimated';
 
+import '@/services/notifications'; // Ensure handler is configured early
+import { initializeNotifications, useNotificationListeners } from '@/services/notifications/notification-initialization';
 import { initializeStorage } from '@/stores/storage';
 
 export {
@@ -23,6 +25,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     initializeStorage();
+    initializeNotifications();
   }, []);
 
   useEffect(() => {
@@ -44,6 +47,9 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+
+  // Set up notification listeners
+  useNotificationListeners();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

@@ -35,7 +35,10 @@ export async function scheduleEventNotification(
     event: LunarEvent
 ): Promise<string | undefined> {
     const hasPermission = await requestNotificationPermissions();
-    if (!hasPermission) return undefined;
+    if (!hasPermission) {
+        console.log('[Notifications] Permission not granted, skipping schedule');
+        return undefined;
+    }
 
     // Calculate next occurrence solar date
     const currentYear = new Date().getFullYear();
@@ -69,8 +72,17 @@ export async function scheduleEventNotification(
 
     // Don't schedule if trigger date is in the past
     if (triggerDate <= new Date()) {
+        console.log('[Notifications] Trigger date is in the past:', triggerDate);
         return undefined;
     }
+
+    // Log scheduling details
+    console.log('[Notifications] Scheduling notification:', {
+        eventId: event.id,
+        eventTitle: event.title,
+        triggerDate: triggerDate.toISOString(),
+        reminderDaysBefore: event.reminderDaysBefore,
+    });
 
     // Schedule the notification
     const notificationId = await Notifications.scheduleNotificationAsync({
@@ -87,6 +99,8 @@ export async function scheduleEventNotification(
         },
     });
 
+    console.log('[Notifications] Scheduled successfully, ID:', notificationId);
+
     return notificationId;
 }
 
@@ -94,6 +108,7 @@ export async function scheduleEventNotification(
  * Cancel a scheduled notification
  */
 export async function cancelNotification(notificationId: string): Promise<void> {
+    console.log('[Notifications] Canceling notification:', notificationId);
     await Notifications.cancelScheduledNotificationAsync(notificationId);
 }
 
@@ -101,7 +116,39 @@ export async function cancelNotification(notificationId: string): Promise<void> 
  * Cancel all scheduled notifications
  */
 export async function cancelAllNotifications(): Promise<void> {
+    console.log('[Notifications] Canceling all notifications');
     await Notifications.cancelAllScheduledNotificationsAsync();
+}
+
+/**
+ * Debug utility: Get all scheduled notifications.
+ */
+export async function debugGetAllScheduledNotifications(): Promise<Notifications.NotificationRequest[]> {
+    const notifications = await Notifications.getAllScheduledNotificationsAsync();
+    console.log('[Notifications] All scheduled notifications:', notifications.length);
+    notifications.forEach((n, i) => {
+        console.log(`[Notifications] #${i + 1}:`, {
+            id: n.identifier,
+            title: n.content.title,
+            trigger: n.trigger,
+            data: n.content.data,
+        });
+    });
+    return notifications;
+}
+
+/**
+ * Debug utility: Check current permission status with iOS-specific details.
+ */
+export async function debugCheckPermissions(): Promise<void> {
+    const { status, ios } = await Notifications.getPermissionsAsync();
+    console.log('[Notifications] Detailed permission status:', {
+        status,
+        iosStatus: ios?.status,
+        iosAllowAlert: ios?.allowsAlert,
+        iosAllowBadge: ios?.allowsBadge,
+        iosAllowSound: ios?.allowsSound,
+    });
 }
 
 /**

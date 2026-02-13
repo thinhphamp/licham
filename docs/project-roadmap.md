@@ -52,8 +52,11 @@ All MVP features have been completed and are production-ready. The app provides 
 - ✅ Notification persistence and retrieval
 - ✅ Notification cancellation on event deletion
 - ✅ iOS local notifications (UNUserNotificationCenter)
-- ✅ Android local notifications (NotificationManager)
 - ✅ Permission handling and request flow
+- ✅ iOS notification reliability (listeners + tap handler)
+- ✅ Internal notification debug system
+- ✅ Default reminder setting (8:00 AM) with 15m intervals
+- ✅ Event-specific reminders with 15m intervals config
 
 **Vietnamese Holiday Support**
 - ✅ 13 major national holidays pre-loaded:
@@ -522,7 +525,7 @@ Deep integration with related services and advanced capabilities for power users
 | 1.1.0 | 2026-02-12 | Year/month selector grid, editable reminder settings |
 | 1.1.1 | 2026-02-12 | Bug fixes and build guide |
 | 1.2.0 | 2026-02-12 | Performance Optimization, Vitest & Zod Integration |
-| 1.3.0 | 2026-03 (Est) | Notification System & Background Refresh |
+| 1.3.0 | 2026-02-13 | Notification Reliability, Event Form UI Refinement, 15m Intervals |
 | 1.3.0 | 2026-Q2 | Cloud Sync Integration |
 | 2.0.0 | 2026-Q3 | Multi-language + Community |
 | 2.1.0+ | 2026-Q4+ | Advanced Features |
