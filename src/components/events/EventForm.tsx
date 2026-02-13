@@ -1,7 +1,7 @@
 import { useTheme } from '@/constants/theme';
 import { lunarToSolar } from '@/services/lunar';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { DateSystem, EventFormData, EventType, RecurrenceConfig, RecurrenceMode, RecurrenceUnit } from '@/types/event';
+import { DateSystem, EventFormData, RecurrenceConfig, RecurrenceEndType, RecurrenceMode, RecurrenceUnit } from '@/types/event';
 import { EventFormDataSchema } from '@/types/schemas';
 import { Picker } from '@react-native-picker/picker';
 import React, { useMemo, useState } from 'react';
@@ -23,10 +23,23 @@ interface EventFormProps {
 }
 
 const LUNAR_DAYS = Array.from({ length: 30 }, (_, i) => i + 1);
+const SOLAR_DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 const LUNAR_MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const currentYear = new Date().getFullYear();
 const LUNAR_YEARS = Array.from({ length: 100 }, (_, i) => currentYear - 20 + i);
 const REMINDER_DAYS = [0, 1, 2, 3, 7, 14];
+
+// 30-minute interval time options for reminder dropdown
+const REMINDER_TIMES = [
+    '00:00', '00:30', '01:00', '01:30', '02:00', '02:30',
+    '03:00', '03:30', '04:00', '04:30', '05:00', '05:30',
+    '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
+    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
+    '18:00', '18:30', '19:00', '19:30', '20:00', '20:30',
+    '21:00', '21:30', '22:00', '22:30', '23:00', '23:30',
+];
 
 const RECURRENCE_UNITS: { label: string; value: RecurrenceUnit }[] = [
     { label: 'Ngày', value: 'day' },
@@ -40,6 +53,11 @@ const DATE_SYSTEMS: { label: string; value: DateSystem }[] = [
     { label: 'Dương lịch', value: 'solar' },
 ];
 
+const RECURRENCE_END_TYPES: { label: string; value: RecurrenceEndType }[] = [
+    { label: 'Không bao giờ', value: 'never' },
+    { label: 'Vào ngày', value: 'on_date' },
+];
+
 export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
     const theme = useTheme();
     const defaultReminderDays = useSettingsStore((s) => s.reminderDaysBefore);
@@ -50,7 +68,7 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
     const [lunarDay, setLunarDay] = useState(initialData?.lunarDay ?? 1);
     const [lunarMonth, setLunarMonth] = useState(initialData?.lunarMonth ?? 1);
     const [isLeapMonth, setIsLeapMonth] = useState(initialData?.isLeapMonth ?? false);
-    const [type, setType] = useState<EventType>(initialData?.type ?? 'personal');
+
     const [reminderEnabled, setReminderEnabled] = useState(
         initialData?.reminderEnabled ?? true
     );
@@ -64,9 +82,26 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
         initialData?.recurrenceMode ?? (initialData?.lunarYear ? 'single' : 'recurring')
     );
     const [recurrence, setRecurrence] = useState<RecurrenceConfig>(
-        initialData?.recurrence ?? { frequency: 1, unit: 'year', system: 'lunar' }
+        initialData?.recurrence ?? { frequency: 1, unit: 'year', system: 'lunar', endType: 'never' }
     );
     const [lunarYear, setLunarYear] = useState(initialData?.lunarYear ?? new Date().getFullYear());
+
+    // Recurrence end date states (Solar)
+    const [endDay, setEndDay] = useState(
+        initialData?.recurrence?.endDate
+            ? new Date(initialData.recurrence.endDate).getDate()
+            : new Date().getDate()
+    );
+    const [endMonth, setEndMonth] = useState(
+        initialData?.recurrence?.endDate
+            ? new Date(initialData.recurrence.endDate).getMonth() + 1
+            : new Date().getMonth() + 1
+    );
+    const [endYear, setEndYear] = useState(
+        initialData?.recurrence?.endDate
+            ? new Date(initialData.recurrence.endDate).getFullYear()
+            : new Date().getFullYear() + 1
+    );
 
     const solarDate = useMemo(() => {
         const result = lunarToSolar(lunarDay, lunarMonth, lunarYear, isLeapMonth);
@@ -82,9 +117,14 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
             lunarMonth,
             lunarYear: recurrenceMode === 'single' ? lunarYear : undefined,
             isLeapMonth,
-            type,
+            type: initialData?.type ?? 'personal',
             recurrenceMode,
-            recurrence: recurrenceMode === 'recurring' ? recurrence : undefined,
+            recurrence: recurrenceMode === 'recurring' ? {
+                ...recurrence,
+                endDate: recurrence.endType === 'on_date'
+                    ? `${endYear}-${endMonth.toString().padStart(2, '0')}-${endDay.toString().padStart(2, '0')}`
+                    : undefined
+            } : undefined,
             reminderEnabled,
             reminderDaysBefore,
             reminderTime,
@@ -134,48 +174,6 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                 />
             </View>
 
-            {/* Event Type */}
-            <View style={styles.field}>
-                <Text style={[styles.label, { color: theme.text }]}>Loại sự kiện</Text>
-                <View style={styles.typeButtons}>
-                    <TouchableOpacity
-                        style={[
-                            styles.typeButton,
-                            { borderColor: theme.border },
-                            type === 'personal' && { borderColor: theme.primary, backgroundColor: theme.selected },
-                        ]}
-                        onPress={() => setType('personal')}
-                    >
-                        <Text
-                            style={[
-                                styles.typeText,
-                                { color: theme.textSecondary },
-                                type === 'personal' && { color: theme.primary, fontWeight: '600' },
-                            ]}
-                        >
-                            📅 Cá nhân
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[
-                            styles.typeButton,
-                            { borderColor: theme.border },
-                            type === 'gio' && { borderColor: theme.primary, backgroundColor: theme.selected },
-                        ]}
-                        onPress={() => setType('gio')}
-                    >
-                        <Text
-                            style={[
-                                styles.typeText,
-                                { color: theme.textSecondary },
-                                type === 'gio' && { color: theme.primary, fontWeight: '600' },
-                            ]}
-                        >
-                            🕯️ Ngày Giỗ
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
 
             {/* Recurrence Mode */}
             <View style={styles.field}>
@@ -222,19 +220,6 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                 {recurrenceMode === 'recurring' && (
                     <View style={styles.recurrenceOptions}>
                         <View style={styles.recurrenceRow}>
-                            <View style={styles.frequencyContainer}>
-                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Tần suất</Text>
-                                <TextInput
-                                    style={[inputStyle, styles.frequencyInput]}
-                                    value={recurrence.frequency.toString()}
-                                    onChangeText={(text) => {
-                                        const val = parseInt(text, 10);
-                                        setRecurrence({ ...recurrence, frequency: isNaN(val) ? 1 : val });
-                                    }}
-                                    keyboardType="number-pad"
-                                    maxLength={2}
-                                />
-                            </View>
                             <View style={styles.pickerContainer}>
                                 <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Đơn vị</Text>
                                 <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
@@ -264,9 +249,83 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                                 </View>
                             </View>
                         </View>
+
+                        <View style={[styles.recurrenceRow, { marginTop: 12 }]}>
+                            <View style={styles.pickerContainer}>
+                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Kết thúc lặp</Text>
+                                <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                    <Picker
+                                        selectedValue={recurrence.endType}
+                                        onValueChange={(val) => setRecurrence({ ...recurrence, endType: val as RecurrenceEndType })}
+                                        dropdownIconColor={theme.textSecondary}
+                                    >
+                                        {RECURRENCE_END_TYPES.map((t) => (
+                                            <Picker.Item key={t.value} label={t.label} value={t.value} color={theme.text} />
+                                        ))}
+                                    </Picker>
+                                </View>
+                            </View>
+                        </View>
+
+                        {recurrence.endType === 'on_date' && (
+                            <View style={[styles.dateRow, { marginTop: 12 }]}>
+                                <View style={styles.pickerContainer}>
+                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Ngày kết thúc</Text>
+                                    <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                        <Picker
+                                            selectedValue={endDay}
+                                            onValueChange={(val) => setEndDay(Number(val))}
+                                            dropdownIconColor={theme.textSecondary}
+                                        >
+                                            {SOLAR_DAYS.map((d) => (
+                                                <Picker.Item key={d} label={`${d}`} value={d} color={theme.text} />
+                                            ))}
+                                        </Picker>
+                                    </View>
+                                </View>
+                                <View style={styles.pickerContainer}>
+                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Tháng kết thúc</Text>
+                                    <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                        <Picker
+                                            selectedValue={endMonth}
+                                            onValueChange={(val) => setEndMonth(Number(val))}
+                                            dropdownIconColor={theme.textSecondary}
+                                        >
+                                            {LUNAR_MONTHS.map((m) => (
+                                                <Picker.Item key={m} label={`${m}`} value={m} color={theme.text} />
+                                            ))}
+                                        </Picker>
+                                    </View>
+                                </View>
+                                <View style={styles.pickerContainer}>
+                                    <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Năm kết thúc</Text>
+                                    <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                        <Picker
+                                            selectedValue={endYear}
+                                            onValueChange={(val) => setEndYear(Number(val))}
+                                            dropdownIconColor={theme.textSecondary}
+                                        >
+                                            {LUNAR_YEARS.map((y) => (
+                                                <Picker.Item key={y} label={`${y}`} value={y} color={theme.text} />
+                                            ))}
+                                        </Picker>
+                                    </View>
+                                </View>
+                            </View>
+                        )}
                     </View>
                 )}
             </View>
+
+            {/* Solar Date Display - FIRST */}
+            {solarDate && (
+                <View style={[styles.field, styles.solarDateField]}>
+                    <Text style={[styles.label, { color: theme.text, marginBottom: 0 }]}>Ngày dương lịch</Text>
+                    <Text style={[styles.solarDateValue, { color: theme.textSecondary }]}>
+                        {solarDate.day.toString().padStart(2, '0')}/{solarDate.month.toString().padStart(2, '0')}/{solarDate.year}
+                    </Text>
+                </View>
+            )}
 
             {/* Lunar Date */}
             <View style={styles.field}>
@@ -317,25 +376,6 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                         </View>
                     )}
                 </View>
-                <View style={styles.switchRow}>
-                    <Text style={[styles.switchLabel, { color: theme.textSecondary }]}>Tháng nhuận</Text>
-                    <Switch
-                        value={isLeapMonth}
-                        onValueChange={setIsLeapMonth}
-                        trackColor={{ false: theme.border, true: theme.primary }}
-                    />
-                </View>
-
-                {solarDate && (
-                    <View style={styles.solarDateRow}>
-                        <Text style={[styles.solarDateLabel, { color: theme.textMuted }]}>
-                            Ngày dương lịch:
-                        </Text>
-                        <Text style={[styles.solarDateValue, { color: theme.text }]}>
-                            {solarDate.day.toString().padStart(2, '0')}/{solarDate.month.toString().padStart(2, '0')}/{solarDate.year}
-                        </Text>
-                    </View>
-                )}
             </View>
 
             {/* Reminder */}
@@ -351,33 +391,46 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
 
                 {reminderEnabled && (
                     <View style={styles.reminderOptions}>
-                        <View style={styles.pickerContainer}>
-                            <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Nhắc trước</Text>
-                            <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
-                                <Picker
-                                    selectedValue={reminderDaysBefore}
-                                    onValueChange={(val) => setReminderDaysBefore(Number(val))}
-                                    dropdownIconColor={theme.textSecondary}
-                                >
-                                    {REMINDER_DAYS.map((d) => (
-                                        <Picker.Item
-                                            key={d}
-                                            label={d === 0 ? 'Trong ngày' : `${d} ngày`}
-                                            value={d}
-                                            color={theme.text}
-                                        />
-                                    ))}
-                                </Picker>
+                        <View style={styles.reminderRow}>
+                            <View style={styles.pickerContainer}>
+                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Nhắc trước</Text>
+                                <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                    <Picker
+                                        selectedValue={reminderDaysBefore}
+                                        onValueChange={(val) => setReminderDaysBefore(Number(val))}
+                                        dropdownIconColor={theme.textSecondary}
+                                    >
+                                        {REMINDER_DAYS.map((d) => (
+                                            <Picker.Item
+                                                key={d}
+                                                label={d === 0 ? 'Trong ngày' : `${d} ngày`}
+                                                value={d}
+                                                color={theme.text}
+                                            />
+                                        ))}
+                                    </Picker>
+                                </View>
+                            </View>
+                            <View style={styles.pickerContainer}>
+                                <Text style={[styles.pickerLabel, { color: theme.textMuted }]}>Giờ nhắc</Text>
+                                <View style={[styles.pickerWrapper, { backgroundColor: theme.surface }]}>
+                                    <Picker
+                                        selectedValue={reminderTime}
+                                        onValueChange={(val) => setReminderTime(val as string)}
+                                        dropdownIconColor={theme.textSecondary}
+                                    >
+                                        {REMINDER_TIMES.map((time) => (
+                                            <Picker.Item
+                                                key={time}
+                                                label={time}
+                                                value={time}
+                                                color={theme.text}
+                                            />
+                                        ))}
+                                    </Picker>
+                                </View>
                             </View>
                         </View>
-                        <TextInput
-                            style={[inputStyle, styles.timeInput]}
-                            value={reminderTime}
-                            onChangeText={setReminderTime}
-                            placeholder="08:00"
-                            placeholderTextColor={theme.textMuted}
-                            keyboardType="numbers-and-punctuation"
-                        />
                     </View>
                 )}
             </View>
@@ -408,6 +461,13 @@ const styles = StyleSheet.create({
     },
     field: {
         marginBottom: 20,
+    },
+    solarDateField: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 12,
+        marginBottom: 24,
     },
     label: {
         fontSize: 14,
@@ -459,28 +519,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 12,
     },
-    solarDateRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 12,
-        gap: 8,
-    },
-    solarDateLabel: {
-        fontSize: 14,
-    },
     solarDateValue: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '500',
-    },
-    switchLabel: {
-        fontSize: 14,
     },
     reminderOptions: {
         marginTop: 12,
-        gap: 12,
     },
-    timeInput: {
-        width: 100,
+    reminderRow: {
+        flexDirection: 'row',
+        gap: 12,
     },
     buttons: {
         flexDirection: 'row',
@@ -508,13 +556,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 8,
         alignItems: 'flex-end',
-    },
-    frequencyContainer: {
-        width: 60,
-    },
-    frequencyInput: {
-        padding: 8,
-        textAlign: 'center',
     },
     submitButton: {
         flex: 1,
