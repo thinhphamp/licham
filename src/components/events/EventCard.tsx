@@ -20,12 +20,13 @@ export function EventCard({ event, onPress }: EventCardProps) {
         >
             <View
                 style={[
-                    styles.typeIndicator,
+                    styles.dateIndicator,
                     { backgroundColor: theme.surface },
                     isGio && { backgroundColor: theme.selected },
                 ]}
             >
-                <Text style={styles.icon}>{isGio ? '🕯️' : '📅'}</Text>
+                <Text style={[styles.day, { color: theme.text }]}>{event.lunarDay}</Text>
+                <Text style={[styles.month, { color: theme.textSecondary }]}>Th.{event.lunarMonth}</Text>
             </View>
             <View style={styles.content}>
                 <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
@@ -54,16 +55,23 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
         elevation: 2,
     },
-    typeIndicator: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+    dateIndicator: {
+        width: 48,
+        height: 48,
+        borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 12,
     },
-    icon: {
+    day: {
         fontSize: 20,
+        fontWeight: '700',
+        lineHeight: 22,
+    },
+    month: {
+        fontSize: 11,
+        fontWeight: '500',
+        lineHeight: 14,
     },
     content: {
         flex: 1,
