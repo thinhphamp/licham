@@ -1,6 +1,8 @@
 import { useTheme } from '@/constants/theme';
 import { dateToJd, getAuspiciousHours } from '@/services/lunar';
 import { DayInfo } from '@/services/lunar/types';
+import { useEventsStore } from '@/stores/eventStore';
+import { isEventOccurring } from '@/utils/recurrence';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
@@ -40,6 +42,23 @@ export function DayDetailModal({ visible, onClose, dayInfo }: DayDetailModalProp
         holiday,
     } = dayInfo;
 
+    // Get events for this day
+    const events = useEventsStore((state) => state.events);
+
+    const dayEvents = useMemo(() => {
+        const targetDate = new Date(solar.year, solar.month - 1, solar.day);
+        const targetLunar = {
+            day: lunar.day,
+            month: lunar.month,
+            year: lunar.year,
+            leap: lunar.leap,
+        };
+
+        return events.filter((event) =>
+            isEventOccurring(event, targetDate, targetLunar)
+        );
+    }, [events, solar, lunar]);
+
     const handleCreateEvent = () => {
         onClose();
         router.push({
@@ -51,6 +70,11 @@ export function DayDetailModal({ visible, onClose, dayInfo }: DayDetailModalProp
                 isLeapMonth: lunar.leap ? 'true' : 'false',
             },
         });
+    };
+
+    const handleEventPress = (eventId: string) => {
+        onClose();
+        router.push(`/event/${eventId}`);
     };
 
     // Format solar date
@@ -89,6 +113,30 @@ export function DayDetailModal({ visible, onClose, dayInfo }: DayDetailModalProp
                                 <Ionicons name="star" size={14} color={theme.auspicious} />
                                 <Text style={[styles.holidayText, { color: theme.auspicious }]}>{holiday.name}</Text>
                             </View>
+                        )}
+                    </View>
+
+                    {/* Events Section */}
+                    <View style={[styles.eventsSection, { borderBottomColor: theme.border }]}>
+                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Sự kiện</Text>
+                        {dayEvents.length === 0 ? (
+                            <Text style={[styles.emptyEvents, { color: theme.textMuted }]}>
+                                Chưa có sự kiện
+                            </Text>
+                        ) : (
+                            dayEvents.map((event) => (
+                                <TouchableOpacity
+                                    key={event.id}
+                                    style={styles.eventRow}
+                                    onPress={() => handleEventPress(event.id)}
+                                >
+                                    <View style={[styles.eventDot, { backgroundColor: event.color || theme.primary }]} />
+                                    <Text style={[styles.eventTitle, { color: theme.text }]} numberOfLines={1}>
+                                        {event.title}
+                                    </Text>
+                                    <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
+                                </TouchableOpacity>
+                            ))
                         )}
                     </View>
 
@@ -180,6 +228,29 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '500',
         marginLeft: 6,
+    },
+    eventsSection: {
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+    },
+    emptyEvents: {
+        fontSize: 14,
+        fontStyle: 'italic',
+    },
+    eventRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    eventDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: 10,
+    },
+    eventTitle: {
+        flex: 1,
+        fontSize: 15,
     },
     canChiSection: {
         paddingVertical: 16,
