@@ -18,10 +18,6 @@
       "bundleIdentifier": "com.thinh.lichviet.personal",
       "infoPlist": {
         "CFBundleDisplayName": "Lịch Việt",
-        "UIBackgroundModes": [
-          "fetch",
-          "remote-notification"
-        ],
         "ITSAppUsesNonExemptEncryption": false
       }
     },
