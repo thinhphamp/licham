@@ -1,3 +1,4 @@
+import { useTheme } from '@/constants/theme';
 import React from 'react';
 import {
     ActivityIndicator,
@@ -27,35 +28,36 @@ export const Button = ({
     style,
     textStyle,
 }: ButtonProps) => {
+    const theme = useTheme();
     const isPrimary = variant === 'primary';
     const isOutline = variant === 'outline';
+
+    const buttonStyle = [
+        styles.button,
+        isPrimary && { backgroundColor: theme.primary },
+        isOutline && { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.primary },
+        disabled && { backgroundColor: theme.surface, borderColor: theme.border },
+        style,
+    ];
+
+    const textStyles = [
+        styles.text,
+        isPrimary && { color: theme.background },
+        isOutline && { color: theme.primary },
+        disabled && { color: theme.textMuted },
+        textStyle,
+    ];
 
     return (
         <TouchableOpacity
             onPress={onPress}
             disabled={disabled || loading}
-            style={[
-                styles.button,
-                isPrimary && styles.primaryButton,
-                isOutline && styles.outlineButton,
-                disabled && styles.disabledButton,
-                style,
-            ]}
+            style={buttonStyle}
         >
             {loading ? (
-                <ActivityIndicator color={isPrimary ? '#FFFFFF' : '#D4382A'} />
+                <ActivityIndicator color={isPrimary ? theme.background : theme.primary} />
             ) : (
-                <Text
-                    style={[
-                        styles.text,
-                        isPrimary && styles.primaryText,
-                        isOutline && styles.outlineText,
-                        disabled && styles.disabledText,
-                        textStyle,
-                    ]}
-                >
-                    {title}
-                </Text>
+                <Text style={textStyles}>{title}</Text>
             )}
         </TouchableOpacity>
     );
@@ -70,29 +72,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         minWidth: 120,
     },
-    primaryButton: {
-        backgroundColor: '#D4382A',
-    },
-    outlineButton: {
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: '#D4382A',
-    },
-    disabledButton: {
-        backgroundColor: '#F5F5F5',
-        borderColor: '#DDDDDD',
-    },
     text: {
         fontSize: 16,
         fontWeight: '600',
-    },
-    primaryText: {
-        color: '#FFFFFF',
-    },
-    outlineText: {
-        color: '#D4382A',
-    },
-    disabledText: {
-        color: '#999999',
     },
 });

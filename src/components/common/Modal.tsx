@@ -1,3 +1,4 @@
+import { useTheme } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
@@ -17,6 +18,8 @@ interface ModalProps {
 }
 
 export const Modal = ({ visible, onClose, title, children }: ModalProps) => {
+    const theme = useTheme();
+
     return (
         <RNModal
             visible={visible}
@@ -24,12 +27,12 @@ export const Modal = ({ visible, onClose, title, children }: ModalProps) => {
             presentationStyle="pageSheet"
             onRequestClose={onClose}
         >
-            <SafeAreaView style={styles.safeArea}>
-                <View style={styles.header}>
+            <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+                <View style={[styles.header, { borderBottomColor: theme.border }]}>
                     <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                        <Ionicons name="close" size={24} color="#666666" />
+                        <Ionicons name="close" size={24} color={theme.textMuted} />
                     </TouchableOpacity>
-                    {title && <Text style={styles.title}>{title}</Text>}
+                    {title && <Text style={[styles.title, { color: theme.text }]}>{title}</Text>}
                     <View style={styles.placeholder} />
                 </View>
                 <View style={styles.content}>{children}</View>
@@ -41,7 +44,6 @@ export const Modal = ({ visible, onClose, title, children }: ModalProps) => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
     },
     header: {
         flexDirection: 'row',
@@ -50,7 +52,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
     },
     closeButton: {
         padding: 4,
@@ -58,7 +59,6 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 17,
         fontWeight: '600',
-        color: '#1A1A1A',
     },
     placeholder: {
         width: 32,
