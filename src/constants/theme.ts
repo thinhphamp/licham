@@ -1,3 +1,4 @@
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useColorScheme } from 'react-native';
 
 export const palette = {
@@ -58,10 +59,18 @@ export const colors = {
 };
 
 export function useTheme() {
-    const colorScheme = useColorScheme();
-    const theme = colorScheme === 'dark' ? colors.dark : colors.light;
+    const systemColorScheme = useColorScheme();
+    const themeMode = useSettingsStore((s) => s.themeMode);
+
+    // Determine effective color scheme
+    const effectiveScheme = themeMode === 'system'
+        ? systemColorScheme
+        : themeMode;
+
+    const theme = effectiveScheme === 'dark' ? colors.dark : colors.light;
+
     return {
         ...theme,
-        isDark: colorScheme === 'dark',
+        isDark: effectiveScheme === 'dark',
     };
 }

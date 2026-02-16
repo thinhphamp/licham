@@ -3,8 +3,8 @@ import { getDayInfo } from '@/services/lunar';
 import { useEventsStore } from '@/stores/eventStore';
 import { getEventsMapForMonth } from '@/utils/calendar';
 import { Ionicons } from '@expo/vector-icons';
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { PanResponder, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { DayCell } from './DayCell';
 import { DayDetailModal } from './DayDetailModal';
@@ -75,6 +75,47 @@ export function CalendarView() {
         setCurrentMonth(now);
     }, []);
 
+    // Navigate to next month (swipe up)
+    const goToNextMonth = useCallback(() => {
+        const date = new Date(currentMonth);
+        date.setMonth(date.getMonth() + 1);
+        setCurrentMonth(date.toISOString().split('T')[0]);
+    }, [currentMonth]);
+
+    // Navigate to previous month (swipe down)
+    const goToPrevMonth = useCallback(() => {
+        const date = new Date(currentMonth);
+        date.setMonth(date.getMonth() - 1);
+        setCurrentMonth(date.toISOString().split('T')[0]);
+    }, [currentMonth]);
+
+    // Store refs for PanResponder callbacks to avoid stale closures
+    const goToNextMonthRef = useRef(goToNextMonth);
+    const goToPrevMonthRef = useRef(goToPrevMonth);
+    goToNextMonthRef.current = goToNextMonth;
+    goToPrevMonthRef.current = goToPrevMonth;
+
+    // PanResponder for vertical swipe gesture detection
+    const panResponder = useMemo(() => PanResponder.create({
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_, gestureState) => {
+            // Only capture vertical swipes (not horizontal or taps)
+            // Threshold of 10px to start tracking, and must be more vertical than horizontal
+            return Math.abs(gestureState.dy) > 10 &&
+                   Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
+        },
+        onPanResponderRelease: (_, gestureState) => {
+            const SWIPE_THRESHOLD = 50;
+            if (gestureState.dy < -SWIPE_THRESHOLD) {
+                // Swipe up → next month
+                goToNextMonthRef.current();
+            } else if (gestureState.dy > SWIPE_THRESHOLD) {
+                // Swipe down → previous month
+                goToPrevMonthRef.current();
+            }
+        },
+    }), []);
+
     const handleDayPress = useCallback((date: any) => {
         setSelectedDate(date.dateString);
         setIsModalVisible(true);
@@ -106,14 +147,15 @@ export function CalendarView() {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
-            <Calendar
-                key={currentMonth}
-                current={currentMonth}
-                markedDates={markedDates}
-                dayComponent={renderDay}
-                onMonthChange={onMonthChange}
-                firstDay={1}
-                enableSwipeMonths={true}
+            <View {...panResponder.panHandlers}>
+                <Calendar
+                    key={currentMonth}
+                    current={currentMonth}
+                    markedDates={markedDates}
+                    dayComponent={renderDay}
+                    onMonthChange={onMonthChange}
+                    firstDay={1}
+                    enableSwipeMonths={false}
                 theme={{
                     calendarBackground: theme.background,
                     textSectionTitleColor: theme.textSecondary,
@@ -190,7 +232,8 @@ export function CalendarView() {
                         </View>
                     );
                 }}
-            />
+                />
+            </View>
 
             <MonthYearPickerModal
                 visible={isPickerVisible}

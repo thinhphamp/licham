@@ -1,7 +1,7 @@
 import { useTheme } from '@/constants/theme';
-import { lunarToSolar } from '@/services/lunar';
+import { lunarToSolar, solarToLunar } from '@/services/lunar';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { DateSystem, EventFormData, RecurrenceConfig, RecurrenceEndType, RecurrenceMode, RecurrenceUnit } from '@/types/event';
+import { DateSystem, EventFormData, LunarEvent, RecurrenceConfig, RecurrenceEndType, RecurrenceMode, RecurrenceUnit } from '@/types/event';
 import { EventFormDataSchema } from '@/types/schemas';
 import { Picker } from '@react-native-picker/picker';
 import React, { useMemo, useState } from 'react';
@@ -18,10 +18,33 @@ import {
     View,
 } from 'react-native';
 
+// Initial data can be either EventFormData (new event) or LunarEvent (editing existing)
+type InitialEventData = Partial<EventFormData> & { createdAt?: string };
+
 interface EventFormProps {
-    initialData?: Partial<EventFormData>;
+    initialData?: InitialEventData;
     onSubmit: (data: EventFormData) => void;
     onCancel: () => void;
+}
+
+/**
+ * Derives the starting lunar year for an event.
+ * For single events, uses the stored lunarYear.
+ * For recurring events (no lunarYear), converts createdAt solar date to lunar.
+ */
+function getInitialLunarYear(data?: InitialEventData): number {
+    if (data?.lunarYear !== undefined) {
+        return data.lunarYear;
+    }
+    if (data?.createdAt) {
+        const created = new Date(data.createdAt);
+        const lunarDate = solarToLunar(created.getDate(), created.getMonth() + 1, created.getFullYear());
+        return lunarDate.year;
+    }
+    // Default for new events: convert current solar date to lunar
+    const now = new Date();
+    const lunar = solarToLunar(now.getDate(), now.getMonth() + 1, now.getFullYear());
+    return lunar.year;
 }
 
 const LUNAR_DAYS = Array.from({ length: 30 }, (_, i) => i + 1);
@@ -76,7 +99,7 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
     const [recurrence, setRecurrence] = useState<RecurrenceConfig>(
         initialData?.recurrence ?? { frequency: 1, unit: 'year', system: 'lunar', endType: 'never' }
     );
-    const [lunarYear, setLunarYear] = useState(initialData?.lunarYear ?? new Date().getFullYear());
+    const [lunarYear, setLunarYear] = useState(() => getInitialLunarYear(initialData));
 
     // Recurrence end date states (Solar)
     const initialEndMatch = initialData?.recurrence?.endDate?.split('-').map(Number);

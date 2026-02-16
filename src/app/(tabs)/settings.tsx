@@ -14,12 +14,20 @@ export default function SettingsScreen() {
     const {
         reminderDaysBefore,
         reminderTime,
+        themeMode,
         setReminderDaysBefore,
         setReminderTime,
+        setThemeMode,
     } = useSettingsStore();
 
     const [daysInput, setDaysInput] = useState(reminderDaysBefore.toString());
     const [timeInput, setTimeInput] = useState(reminderTime);
+
+    const themeOptions = [
+        { value: 'system' as const, label: 'Hệ thống (theo thiết bị)' },
+        { value: 'light' as const, label: 'Sáng' },
+        { value: 'dark' as const, label: 'Tối' },
+    ];
 
     const handleDaysChange = (text: string) => {
         setDaysInput(text);
@@ -46,6 +54,26 @@ export default function SettingsScreen() {
                 style={[styles.container, { backgroundColor: theme.surfaceAlt }]}
                 keyboardShouldPersistTaps="handled"
             >
+                {/* Appearance Section */}
+                <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                    <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Giao diện</Text>
+                    {themeOptions.map((option, index) => (
+                        <TouchableOpacity
+                            key={option.value}
+                            style={[
+                                styles.row,
+                                { borderBottomColor: index === themeOptions.length - 1 ? 'transparent' : theme.border }
+                            ]}
+                            onPress={() => setThemeMode(option.value)}
+                        >
+                            <Text style={[styles.label, { color: theme.text }]}>{option.label}</Text>
+                            {themeMode === option.value && (
+                                <Ionicons name="checkmark" size={20} color={theme.primary} />
+                            )}
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
                 <View style={[styles.section, { backgroundColor: theme.background, borderColor: theme.border }]}>
                     <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>Nhắc nhở mặc định</Text>
 
