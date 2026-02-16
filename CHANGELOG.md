@@ -5,6 +5,16 @@ All notable changes to Lịch Việt (Vietnamese Lunar Calendar) are documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-02-16
+
+### Fixed
+- **Dark Mode**: Fixed hardcoded colors in 10 components to properly support dark mode theme.
+- **Swipe Navigation**: Fixed vertical swipe gesture detection using capture phase for month navigation.
+- **Recurring Events**: Fixed lunar year derivation from createdAt for recurring events.
+
+### Changed
+- **Settings**: Removed debug section from settings screen.
+
 ## [1.6.0] - 2026-02-15
 
 ### Added
