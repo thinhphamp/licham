@@ -96,13 +96,17 @@ export function CalendarView() {
     goToPrevMonthRef.current = goToPrevMonth;
 
     // PanResponder for vertical swipe gesture detection
+    // Uses capture phase to intercept gestures before Calendar's internal handlers
     const panResponder = useMemo(() => PanResponder.create({
         onStartShouldSetPanResponder: () => false,
-        onMoveShouldSetPanResponder: (_, gestureState) => {
-            // Only capture vertical swipes (not horizontal or taps)
-            // Threshold of 10px to start tracking, and must be more vertical than horizontal
-            return Math.abs(gestureState.dy) > 10 &&
-                   Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
+        onMoveShouldSetPanResponder: () => false,
+        // Capture phase: intercept vertical swipes before child components
+        onMoveShouldSetPanResponderCapture: (_, gestureState) => {
+            // Only capture significant vertical swipes (not taps or horizontal swipes)
+            // Higher threshold to avoid stealing taps on day cells
+            const isVerticalSwipe = Math.abs(gestureState.dy) > 15 &&
+                                    Math.abs(gestureState.dy) > Math.abs(gestureState.dx) * 1.5;
+            return isVerticalSwipe;
         },
         onPanResponderRelease: (_, gestureState) => {
             const SWIPE_THRESHOLD = 50;
