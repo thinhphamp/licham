@@ -1,14 +1,29 @@
-import { getDayInfo } from '@/services/lunar';
+import { getDayInfo, lunarToSolar, solarToLunar } from '@/services/lunar';
 import { LunarEvent } from '@/types/event';
+
+/**
+ * Derives the lunar year for a recurring event from its createdAt timestamp.
+ * For recurring events, lunarYear is undefined, so we need to convert
+ * the solar createdAt date to lunar to get the correct starting lunar year.
+ */
+export function getEventLunarYear(event: LunarEvent): number {
+    if (event.lunarYear !== undefined) {
+        return event.lunarYear;
+    }
+    // Convert createdAt solar date to lunar to get the correct lunar year
+    const created = new Date(event.createdAt);
+    const lunarDate = solarToLunar(created.getDate(), created.getMonth() + 1, created.getFullYear());
+    return lunarDate.year;
+}
 
 /**
  * Checks if a recurring event occurs on a specific solar/lunar date.
  */
 export function isEventOccurring(event: LunarEvent, targetDate: Date, targetLunar: { day: number, month: number, year: number, leap: boolean }): boolean {
-    const start = new Date(event.createdAt);
-
-    // Normalize dates to midnight
-    const startMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    // Derive start lunar year from event's lunarYear or by converting createdAt to lunar
+    const startYear = getEventLunarYear(event);
+    const solarStart = lunarToSolar(event.lunarDay, event.lunarMonth, startYear, event.isLeapMonth);
+    const startMidnight = new Date(solarStart.year, solarStart.month - 1, solarStart.day);
     const targetMidnight = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
 
     if (targetMidnight < startMidnight) return false;
@@ -45,12 +60,12 @@ export function isEventOccurring(event: LunarEvent, targetDate: Date, targetLuna
             case 'month':
                 const monthsDiff = (targetMidnight.getFullYear() - startMidnight.getFullYear()) * 12 + (targetMidnight.getMonth() - startMidnight.getMonth());
                 // Match day of month
-                return targetMidnight.getDate() === start.getDate() && monthsDiff % frequency === 0;
+                return targetMidnight.getDate() === startMidnight.getDate() && monthsDiff % frequency === 0;
             case 'year':
                 const yearsDiff = targetMidnight.getFullYear() - startMidnight.getFullYear();
                 return (
-                    targetMidnight.getDate() === start.getDate() &&
-                    targetMidnight.getMonth() === start.getMonth() &&
+                    targetMidnight.getDate() === startMidnight.getDate() &&
+                    targetMidnight.getMonth() === startMidnight.getMonth() &&
                     yearsDiff % frequency === 0
                 );
         }
@@ -74,13 +89,13 @@ export function isEventOccurring(event: LunarEvent, targetDate: Date, targetLuna
                 if (frequency === 1) return dayMatch;
 
                 // Very basic approximation for freq > 1
-                const startInfo = getDayInfo(start.getDate(), start.getMonth() + 1, start.getFullYear());
+                const startInfo = getDayInfo(startMidnight.getDate(), startMidnight.getMonth() + 1, startMidnight.getFullYear());
                 const totalMonthsApprox = (targetLunar.year - startInfo.lunar.year) * 12 + (targetLunar.month - startInfo.lunar.month);
                 return dayMatch && totalMonthsApprox % frequency === 0;
             case 'year':
                 // Every N lunar years on same day/month
                 if (!dayMatch || !monthMatch || !leapMatch) return false;
-                const startYearInfo = getDayInfo(start.getDate(), start.getMonth() + 1, start.getFullYear());
+                const startYearInfo = getDayInfo(startMidnight.getDate(), startMidnight.getMonth() + 1, startMidnight.getFullYear());
                 const yearsDiff = targetLunar.year - startYearInfo.lunar.year;
                 return yearsDiff % frequency === 0;
         }
