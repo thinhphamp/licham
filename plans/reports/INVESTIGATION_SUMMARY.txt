@@ -1,0 +1,190 @@
+================================================================================
+INVESTIGATION SUMMARY: Repeating Event Date Shift Bug
+================================================================================
+
+DATE: Feb 15, 2026
+ISSUE: Creating a repeating event on Feb 16, 2026 shows on Feb 15, 2026
+SEVERITY: High
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+PRIMARY BUG LOCATION:
+  File: /Users/thinhpham/dev/calendar-app/src/utils/recurrence.ts
+  Line: 8
+  Function: isEventOccurring()
+  Issue: Timezone mismatch when parsing event.createdAt timestamp
+
+ROOT CAUSE:
+  JavaScript Date object behaves inconsistently:
+  - new Date("2026-02-15T17:30:45.123Z") parses as UTC
+  - new Date(2026, 1, 15) creates local timezone date
+  
+  Mixing these creates a 1-day shift for UTC+7 timezones.
+
+WORKFLOW ANALYSIS:
+  1. User creates event on Feb 16 Vietnam time
+  2. System stores: createdAt = "2026-02-15T17:30:45.123Z" (UTC)
+  3. System later parses this timestamp inconsistently
+  4. Results in Feb 15 start date instead of Feb 16
+  5. Event fails to display on Feb 16
+
+TIMEZONE CONTEXT:
+  - Vietnam timezone: GMT+7 (hardcoded in lunar converter)
+  - UTC Feb 15 @ 17:30 = Vietnam Feb 16 @ 00:30
+  - Bug: System treats it as Feb 15 Vietnam
+
+================================================================================
+AFFECTED FILES AND LINES
+================================================================================
+
+CRITICAL (Must Fix):
+  1. /Users/thinhpham/dev/calendar-app/src/utils/recurrence.ts
+     Lines: 7-14, 38-49
+     Issue: Uses createdAt timestamp for recurrence calculation
+
+IMPACTED (Depends on Bug):
+  2. /Users/thinhpham/dev/calendar-app/src/utils/calendar.ts
+     Lines: 9-31
+     Uses: isEventOccurring() to check event visibility
+  
+  3. /Users/thinhpham/dev/calendar-app/src/components/calendar/DayDetailModal.tsx
+     Lines: 48-59
+     Uses: isEventOccurring() to filter events for display
+  
+  4. /Users/thinhpham/dev/calendar-app/src/stores/eventStore.ts
+     Lines: 23-31
+     Creates: event with createdAt timestamp
+
+CORRECT (Not Buggy):
+  5. /Users/thinhpham/dev/calendar-app/src/services/lunar/converter.ts
+     Lunar conversion functions work correctly
+     Timezone handling is proper in newMoon.ts
+
+================================================================================
+CODE ANALYSIS
+================================================================================
+
+THE BUG (recurrence.ts:7-14):
+  
+  export function isEventOccurring(
+    event: LunarEvent, 
+    targetDate: Date, 
+    targetLunar: { day: number, month: number, year: number, leap: boolean }
+  ): boolean {
+    const start = new Date(event.createdAt);  // <-- BUG
+    
+    // Normalize dates to midnight
+    const startMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const targetMidnight = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+    
+    if (targetMidnight < startMidnight) return false;
+
+PROBLEM TRACE:
+  Input: event.createdAt = "2026-02-15T17:30:45.123Z"
+  
+  Step 1: const start = new Date(event.createdAt)
+    Result: Date object representing Feb 15, 2026 @ 17:30 UTC
+  
+  Step 2: start.getDate() = 15
+    This gets the UTC date component
+  
+  Step 3: new Date(2026, 1, 15)
+    This creates Feb 15 @ 00:00 in LOCAL timezone (Vietnam)
+  
+  Step 4: Compare Feb 15 (Vietnam local) vs Feb 16 (calendar date)
+    Result: FALSE - No match, event doesn't display
+
+THE FIX:
+  Replace line 8 with one of:
+  
+  OPTION A (Recommended - Use Lunar Date):
+    const solarStart = lunarToSolar(
+      event.lunarDay, 
+      event.lunarMonth, 
+      event.lunarYear || new Date().getFullYear(), 
+      event.isLeapMonth
+    );
+    const start = new Date(solarStart.year, solarStart.month - 1, solarStart.day);
+  
+  OPTION B (Use UTC Consistently):
+    const utcDate = new Date(event.createdAt);
+    const start = new Date(Date.UTC(
+      utcDate.getUTCFullYear(), 
+      utcDate.getUTCMonth(), 
+      utcDate.getUTCDate()
+    ));
+
+================================================================================
+IMPACT ASSESSMENT
+================================================================================
+
+AFFECTED FEATURES:
+  • All repeating/recurring events
+  • Calendar day markers show on wrong date
+  • Day detail modal missing events
+  • Event visibility checks fail
+  • Solar recurrence calculations wrong
+
+NOT AFFECTED:
+  • Single-year (non-repeating) events with explicit lunarYear
+  • Lunar date conversion functions
+  • Event storage in database
+  • UI components (they work correctly if bug fixed)
+
+SEVERITY ANALYSIS:
+  User Impact: HIGH - Events not visible on correct date
+  Scope: ALL repeating events
+  Frequency: Every repeating event affected
+  Workaround: None available
+
+================================================================================
+VERIFICATION STEPS
+================================================================================
+
+TO REPRODUCE:
+  1. Set device timezone to UTC+7 (Vietnam)
+  2. Create new repeating event
+  3. Set date to Feb 16, 2026
+  4. Look at calendar
+  5. Event appears on Feb 15 instead
+
+TO VERIFY FIX:
+  1. Apply recommended fix (Option A)
+  2. Create test event on Feb 16, 2026
+  3. Verify event displays on Feb 16
+  4. Check that old events still work
+  5. Test solar recurrence
+  6. Test lunar recurrence
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+
+IMMEDIATE ACTION:
+  1. Apply Option A fix to recurrence.ts
+  2. Add unit test for Feb 16 scenario
+  3. Test in UTC+7 timezone
+
+LONG-TERM:
+  1. Add explicit startDate field to LunarEvent
+  2. Never use createdAt for date calculations
+  3. Use explicit date fields for business logic
+  4. Add timezone tests for all date operations
+
+DOCUMENTATION:
+  1. Document why Option A was chosen
+  2. Add timezone handling guidelines
+  3. Comment on date/time field usage
+
+================================================================================
+DETAILED REPORTS
+================================================================================
+
+For more information, see:
+  • scout-260215-2117-repeating-event-date-shift-bug.md (Full analysis)
+  • bug-analysis-timeline.md (Visual timeline)
+  • bug-fix-guide.md (Step-by-step fix)
+
+================================================================================

@@ -1,0 +1,158 @@
+================================================================================
+SCOUT REPORT: NOTIFICATIONS & RECURRING EVENTS EXPLORATION COMPLETE
+================================================================================
+
+SEARCH SCOPE: React Native/Expo Vietnamese Lunar Calendar App
+WORK CONTEXT: /Users/thinhpham/dev/calendar-app
+REPORT DATE: 2026-02-15
+REPORTS PATH: /Users/thinhpham/dev/calendar-app/plans/reports/
+
+================================================================================
+FINDINGS SUMMARY
+================================================================================
+
+Total Files Found: 10 core files
+Search Strategy: Parallel grep + glob for "notification", "reminder", "recurrence", "recurring"
+
+CRITICAL DISCOVERIES:
+
+1. DUAL MODE ARCHITECTURE
+   - Single events: lunarYear set, one-time notification
+   - Recurring events: lunarYear undefined, notification for next occurrence only
+   - Calendar display: Dynamic pattern matching via isEventOccurring()
+
+2. NOTIFICATION STRATEGY
+   - NOT scheduling individual notifications per recurrence
+   - Only one notification per recurring event (for next occurrence)
+   - When trigger date passes, tries next year
+   - Calendar view handles repetition via isEventOccurring() logic
+
+3. RECURRENCE SUPPORT
+   - Both Solar AND Lunar calendar systems
+   - Frequency: 1 to N intervals
+   - Units: day, week, month, year
+   - Leap month handling implemented
+
+4. STATE MANAGEMENT
+   - Zustand store with notification lifecycle
+   - Notification ID stored with event
+   - Auto-reschedule on update/import
+   - Legacy migration (v0→v1) for old recurring events
+
+================================================================================
+CORE FILES & LOCATIONS
+================================================================================
+
+TYPES & SCHEMAS:
+  /Users/thinhpham/dev/calendar-app/src/types/event.ts
+  /Users/thinhpham/dev/calendar-app/src/types/schemas.ts
+
+NOTIFICATIONS:
+  /Users/thinhpham/dev/calendar-app/src/services/notifications/index.ts
+  /Users/thinhpham/dev/calendar-app/src/services/notifications/notification-initialization.ts
+
+UTILITIES:
+  /Users/thinhpham/dev/calendar-app/src/utils/recurrence.ts
+  /Users/thinhpham/dev/calendar-app/src/utils/calendar.ts
+
+STATE MANAGEMENT:
+  /Users/thinhpham/dev/calendar-app/src/stores/eventStore.ts
+  /Users/thinhpham/dev/calendar-app/src/stores/settingsStore.ts
+
+UI:
+  /Users/thinhpham/dev/calendar-app/src/components/events/EventForm.tsx
+
+APP:
+  /Users/thinhpham/dev/calendar-app/src/app/_layout.tsx
+
+================================================================================
+KEY CODE SECTIONS
+================================================================================
+
+NOTIFICATION SCHEDULING (index.ts:60-135):
+  - Converts lunar → solar date
+  - Calculates: event_date - reminder_days @ reminder_time
+  - For recurring: if past, tries next year
+  - Schedules via Expo.Notifications.scheduleNotificationAsync()
+
+RECURRENCE MATCHING (recurrence.ts:7-90):
+  - isEventOccurring(event, targetDate, targetLunar)
+  - Supports 4 patterns: day, week, month, year
+  - Both solar (absolute days) and lunar (calendar rules)
+  - Leap month aware
+
+EVENT LIFECYCLE (eventStore.ts:23-88):
+  - addEvent: Create + schedule notification
+  - updateEvent: Cancel old + reschedule
+  - deleteEvent: Cancel notification + remove
+
+================================================================================
+DELIVERABLES
+================================================================================
+
+Report Files Created:
+
+1. scout-260215-1618-notifications-and-recurrence.md
+   Main comprehensive report with architecture, data flow, implementation details
+
+2. notifications-code-snippets.md
+   7 sections of ready-to-use code snippets with explanations
+
+3. file-paths-index.md
+   Complete file index, quick access guide, function locations, data structures
+
+4. SCOUT_SUMMARY.txt
+   This summary document
+
+================================================================================
+UNRESOLVED QUESTIONS
+================================================================================
+
+1. Does app reschedule recurring notifications on app resume/cold start?
+   (Code for this not found; may be missing feature)
+
+2. How are past-due recurring events handled?
+   (Appear to be silently skipped in notification schedule)
+
+3. Is there timezone change handling for scheduled notifications?
+   (Not visible in scheduling logic)
+
+4. Is recurrence end date (endDate field) actively enforced?
+   (Field exists in schema but no enforcement found in isEventOccurring)
+
+5. What happens to notifications if user uninstalls/reinstalls app?
+   (Notifications are re-scheduled on import, but cold start behavior unclear)
+
+================================================================================
+SEARCH COMMANDS USED
+================================================================================
+
+Parallel Searches Executed:
+- grep -r "notification|notify|schedule|reminder" src/
+- grep -r "repeat|recurring|recurrence|rrule" src/
+- glob src/services/notifications/**/*
+- glob src/types/**/*
+
+Files Directly Examined: 10
+Files Referenced: 2 additional (lunar converter, router)
+Code Lines Read: 800+
+
+================================================================================
+NEXT STEPS FOR USERS
+================================================================================
+
+To extend or debug notifications:
+1. Start with /src/types/event.ts for data structures
+2. Review /src/services/notifications/index.ts for scheduling logic
+3. Check /src/utils/recurrence.ts for pattern matching
+4. Use /src/stores/eventStore.ts to understand lifecycle
+
+To add new features:
+- Reschedule on cold start: Modify eventStore.ts import logic
+- Enforce end dates: Modify isEventOccurring() in recurrence.ts
+- Timezone support: Add timezone field to LunarEvent + adjust trigger calculation
+- Multiple notifications per recurrence: Redesign scheduleEventNotification()
+
+================================================================================
+END OF REPORT
+================================================================================
