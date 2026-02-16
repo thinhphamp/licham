@@ -1,3 +1,4 @@
+import { useTheme } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -10,18 +11,19 @@ interface HeaderProps {
 }
 
 export const Header = ({ title, showBack = false, rightElement }: HeaderProps) => {
+    const theme = useTheme();
     const router = useRouter();
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
             <View style={styles.left}>
                 {showBack && (
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
+                        <Ionicons name="chevron-back" size={24} color={theme.text} />
                     </TouchableOpacity>
                 )}
             </View>
-            <Text style={styles.title} numberOfLines={1}>
+            <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
                 {title}
             </Text>
             <View style={styles.right}>{rightElement}</View>
@@ -36,9 +38,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
-        backgroundColor: '#FFFFFF',
         borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
     },
     left: {
         width: 40,
@@ -56,6 +56,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 18,
         fontWeight: '600',
-        color: '#1A1A1A',
     },
 });

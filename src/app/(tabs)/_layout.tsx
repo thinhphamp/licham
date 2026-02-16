@@ -1,19 +1,18 @@
+import { useTheme } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { useColorScheme } from 'react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const activeColor = '#D4382A'; // Vietnamese red
+  const theme = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: activeColor,
+        tabBarActiveTintColor: theme.primary,
         headerShown: true,
         tabBarStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#1A1A1A' : '#FFFFFF',
+          backgroundColor: theme.background,
         },
       }}
     >

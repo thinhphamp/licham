@@ -163,7 +163,7 @@ export function CalendarView() {
                     dayTextColor: theme.text,
                     textDisabledColor: theme.textMuted,
                     dotColor: theme.primary,
-                    selectedDotColor: '#ffffff',
+                    selectedDotColor: theme.background,
                     todayTextColor: theme.today,
                     arrowColor: theme.primary,
                     textMonthFontWeight: '600',

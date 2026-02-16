@@ -1,20 +1,22 @@
 import { EventList } from '@/components/events/EventList';
+import { useTheme } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function EventsScreen() {
+  const theme = useTheme();
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.surfaceAlt }]}>
       <EventList />
 
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.primary }]}
         onPress={() => router.push('/event/new')}
       >
-        <Ionicons name="add" size={30} color="#FFFFFF" />
+        <Ionicons name="add" size={30} color={theme.background} />
       </TouchableOpacity>
     </View>
   );
@@ -23,7 +25,6 @@ export default function EventsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
   },
   fab: {
     position: 'absolute',
@@ -32,7 +33,6 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#D4382A',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,

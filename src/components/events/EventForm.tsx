@@ -453,7 +453,7 @@ export function EventForm({ initialData, onSubmit, onCancel }: EventFormProps) {
                         style={[styles.submitButton, { backgroundColor: theme.primary }]}
                         onPress={handleSubmit}
                     >
-                        <Text style={styles.submitText}>Lưu</Text>
+                        <Text style={[styles.submitText, { color: theme.background }]}>Lưu</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -572,7 +572,6 @@ const styles = StyleSheet.create({
     },
     submitText: {
         fontSize: 16,
-        color: '#FFFFFF',
         fontWeight: '600',
     },
 });
